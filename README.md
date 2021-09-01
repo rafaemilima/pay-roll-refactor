@@ -21,7 +21,7 @@ Nesse repositório serão identificados e corrigidos alguns code smells do siste
 ![image](https://user-images.githubusercontent.com/53321503/131696813-00587d8e-8582-4764-a5a2-eb3cd39c52cb.png)
 <br>
 
-* Código duplicado: Na classe Employee temos um método de adicionar employee que realiza a mesma função do construtor.
+* Speculative generality e código duplicado: Na classe Employee temos um método de adicionar employee que realiza a mesma função do construtor e não está sendo usado.
 <br><br> ![image](https://user-images.githubusercontent.com/53321503/131696981-205e5719-7985-4ab0-8fcb-d3145a5fa83b.png)
 <br>
 
@@ -38,12 +38,14 @@ Nesse repositório serão identificados e corrigidos alguns code smells do siste
 * Na resolução da **duplicação de código**, farei uso do **extract method** juntamente com o **template method**. 
 * Para solucionar os smells **Long Method**, farei uso dos padrões que combinam hierarquia e polimorfismo, mais necessariamente com os padrões strategy, command e interpreter.
 * Para solucionar os smells de **primitive obcession**, usarei o padrão replace data value with object.
+* Para solucinar o smell de Speculative generality, usou-se uma estratégia semelhante à de chain constructors.
 <br>
 
 ## Smells em solução 
-* Primitive obcession.
+* Primitive obcession. Solucionando com o padrão replace data value with object.
 <br>
 
 
 ## Smells solucionados
 
+* Speculative generality e código duplicado na função addEmployee: Após se certificar que o método era inferior em funcionalidades ao construtor da classe e que o mesmo não estava sendo usado em nenhuma parte do sistema, descartou-se a função mantendo apenas o construtor. 
