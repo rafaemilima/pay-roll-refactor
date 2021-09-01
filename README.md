@@ -6,7 +6,7 @@ Nesse repositório serão identificados e corrigidos alguns code smells do siste
 
 <br>
 
-## Smells Detectados
+## Code Smells Detectados
 
 * Long method: Na classe Actions, o método undoRedo() apresenta diversos ifs e elses, além de ser um método bastante extenso no número de linhas. Segue abaixo um overview da quantidade de decisões efetuadas no método:
 <br>
@@ -176,11 +176,6 @@ Nesse repositório serão identificados e corrigidos alguns code smells do siste
 * Para solucinar o smell de Speculative generality, usou-se uma estratégia semelhante à de chain constructors.
 <br>
 
-## Smells em solução 
-* Primitive obcession. Solucionando com o padrão replace data value with object.
-<br>
-
-
-## Smells solucionados
+## Code Smells solucionados
 
 * Speculative generality e código duplicado na função addEmployee: Após se certificar que o método era inferior em funcionalidades ao construtor da classe e que o mesmo não estava sendo usado em nenhuma parte do sistema, descartou-se a função mantendo apenas o construtor. 
