@@ -37,10 +37,11 @@ Nesse repositório serão identificados e corrigidos alguns code smells do siste
 
 * Na resolução da **duplicação de código**, farei uso do **extract method** juntamente com o **template method**. 
 * Para solucionar os smells **Long Method**, farei uso dos padrões que combinam hierarquia e polimorfismo, mais necessariamente com os padrões strategy, command e interpreter.
-* Para solucionar os smells de **primitive obcession**, usarei o padrão replace array with object.
+* Para solucionar os smells de **primitive obcession**, usarei o padrão replace data value with object.
 <br>
 
 ## Smells em solução 
+* Primitive obcession.
 <br>
 
 
