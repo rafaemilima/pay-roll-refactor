@@ -8,29 +8,164 @@ Nesse repositório serão identificados e corrigidos alguns code smells do siste
 
 ## Smells Detectados
 
-* Long method: Na classe Actions, o método undoRedo() apresenta diversos ifs e elses, além de ser um método bastante extenso no número de linhas.
-<br><br>![image](https://user-images.githubusercontent.com/53321503/131696213-0d433b1d-4268-4eb1-9e81-f092ac44652f.png)
+* Long method: Na classe Actions, o método undoRedo() apresenta diversos ifs e elses, além de ser um método bastante extenso no número de linhas. Segue abaixo um overview da quantidade de decisões efetuadas no método:
+<br>
+
+``` python    
+  def undoRedo(self, company, redo):
+        action = None
+        if not redo and len(self.undostack) > 0:
+        if redo and len(self.redostack) > 0:
+
+        if action:
+            if action.type == "remove":
+            
+            elif action.type == "create":
+            
+            elif action.type == "update":
+            
+            elif action.type == "updatetype":
+                if redo:
+                else:
+                
+            elif action.type == "generaltaxes":
+            elif action.type == "aditionaltaxes":
+                if redo:
+
+            elif action.type == "sale":
+                if redo:
+                else:
+
+            elif action.type == "clockin":
+                if redo:
+
+            elif action.type == "clockout":
+                if redo:
+                else:
+                    
+            elif action.type == "paymentoday":
+                if redo:
+                else:
+
+            if redo:
+            else:
+
+```
+
 <br>
 
 * Long method: Na classe Payagenda, o método getNextPayday() apresenta diversos ifs.
-<br><br>![image](https://user-images.githubusercontent.com/53321503/131696475-27303310-1895-47b3-8db7-df425cd54439.png)
+``` python
+    def getNextPayday(self, month, today):
+        d = dt.date(today[2], today[1], today[0])
+        if self.type == "W":
+            if len(self.nextpayday) == 0:
+                while d.weekday() != self.day:
+                    d += dt.timedelta(1)
+            else:
+                d += dt.timedelta(7)
+
+            list = [d.day, d.month, d.year]
+            self.nextpayday = list
+
+        elif self.type == "M":
+            list = []
+            if self.period == "end":
+                h = self.getLastBusinessDay(2021, month)
+                list = [h, month, d.year]
+            elif self.period == "middle":
+                if d.day > 15:
+                    month += 1
+                list = [15, month, d.year]
+            elif self.period == "beggining":
+                if d.day > 1:
+                    month += 1
+                list = [1, month, d.year]
+
+            self.nextpayday = list
+
+        elif self.type == "B":
+            if len(self.nextpayday) == 0:
+                while d.weekday() != self.day:
+                    d += dt.timedelta(1)
+            else:
+                d += dt.timedelta(14)
+            list = [d.day, d.month, d.year]
+            self.nextpayday = list
+```
+
 <br>
 
 * Long method e código duplicado: Na classe employee temos os métodos update e get attribute que apresentam a mesma estrutura semântica e que tem diveros ifs e elses.
-<br><br> ![image](https://user-images.githubusercontent.com/53321503/131696610-f77358fe-9c69-4fc2-bcd6-a5f97421204e.png)
-![image](https://user-images.githubusercontent.com/53321503/131696813-00587d8e-8582-4764-a5a2-eb3cd39c52cb.png)
+``` python
+    def getAttribute(self, parameter):
+        if parameter == "name":
+            return self.name
+        elif parameter == "salary":
+            return self.salary
+        elif parameter == "syndicate":
+            return self.issyndicate
+        elif parameter == "comission":
+            return self.comission
+        elif parameter == "address":
+            return self.address
+        elif parameter == "paymethod":
+            return self.payment.paymethod
+        elif parameter == "salary_h":
+            return self.salary_h
+        elif parameter == "comission":
+            return self.comission
+
+    def update(self, parameter, value):
+        if parameter == "name":
+            self.name = value
+        elif parameter == "salary":
+            self.salary = value
+        elif parameter == "syndicate":
+            self.issyndicate = value
+        elif parameter == "comission":
+            self.comission = value
+        elif parameter == "address":
+            self.address = value
+        elif parameter == "paymethod":
+            self.payment.paymethod = value
+        elif parameter == "salary_h":
+            self.salary_h = value
+        elif parameter == "comission":
+            self.comission = value
+        return
+```
 <br>
 
 * Speculative generality e código duplicado: Na classe Employee temos um método de adicionar employee que realiza a mesma função do construtor e não está sendo usado.
-<br><br> ![image](https://user-images.githubusercontent.com/53321503/131696981-205e5719-7985-4ab0-8fcb-d3145a5fa83b.png)
+``` python
+    def addEmployee(self, company, name, address, jobtype, salary, issyndicate, salary_h, comission, id = None):
+        if self.id:
+            self.id = id
+        else:
+            self.id = self.defineID(company)
+
+        self.name = name
+        self.address = address
+        self.jobtype = jobtype
+        self.salary = salary
+        self.issyndicate = issyndicate
+        self.salary_h = salary_h
+        self.comission = comission
+        company.employees.append(self)
+```
 <br>
 
 * Primitive obcession: O atributo endereço da classe Employee está sendo tratada como uma string.
-<br><br> ![image](https://user-images.githubusercontent.com/53321503/131697209-cc9e7eb3-b5e8-4597-b232-431de75e09c1.png)
+``` python
+  endereco = input("Endereço: ")
+```
 <br>
 
 * Primitive obcession: O atributo data nas vendas está sendo tratado como uma string.
-<br><br>![image](https://user-images.githubusercontent.com/53321503/131697340-3143e7fc-ceae-4954-918c-84c91ba4bda1.png)
+``` python
+  data = input("informe a data da venda: ")
+```
 <br>
 
 ## Padrões a serem aplicados
