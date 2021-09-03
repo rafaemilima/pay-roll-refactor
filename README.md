@@ -8,7 +8,7 @@ Nesse repositório serão identificados e corrigidos alguns code smells do siste
 
 ## Code Smells Detectados
 
-* Long method: Na classe Actions, o método undoRedo() apresenta diversos ifs e elses, além de ser um método bastante extenso no número de linhas. Segue abaixo um overview da quantidade de decisões efetuadas no método:
+* Long method e Feature envy: Na classe Actions, o método undoRedo() apresenta diversos ifs e elses, além de ser um método bastante extenso no número de linhas. Além disso, o método faz mais uso dos métodos da classe Action, do que da classe Actions. Segue abaixo um overview da quantidade de decisões efetuadas no método:
 <br>
 
 ``` python    
@@ -166,16 +166,37 @@ Nesse repositório serão identificados e corrigidos alguns code smells do siste
 ``` python
   data = input("informe a data da venda: ")
 ```
+
+* Feature envy: O método remove na classe Employee, faz mais uso de métodos e atributos da classe Company.
+
 <br>
 
 ## Padrões a serem aplicados
 
 * Na resolução da **duplicação de código**, farei uso do **extract method** juntamente com o **template method**. 
-* Para solucionar os smells **Long Method**, farei uso dos padrões que combinam hierarquia e polimorfismo, mais necessariamente com os padrões strategy, command e interpreter.
+* Para solucionar os smells **Long Method**, farei uso de padrões que combinam hierarquia e polimorfismo, como o padrão Strategy.
 * Para solucionar os smells de **primitive obcession**, usarei o padrão replace data value with object.
-* Para solucinar o smell de Speculative generality, usou-se uma estratégia semelhante à de chain constructors.
+* Para solucinar o smell de Speculative generality, removerei o método que não está em uso.
+* Para solucionar os smells de Feature Envy farei uso do padrão move method.
 <br>
 
 ## Code Smells solucionados
 
-* Speculative generality e código duplicado na função addEmployee: Após se certificar que o método era inferior em funcionalidades ao construtor da classe e que o mesmo não estava sendo usado em nenhuma parte do sistema, descartou-se a função mantendo apenas o construtor. 
+### Padrões Complexos
+* **Long Method no método undoRedo**: Apois ser deslocado para a classe Action usando o **Move Method**, para cada tomada de decisão principal desse método foi criada uma subclasse correspondente da classe Action. Cada subclasse fazia uso do método abstrato undoRedo de Action, concluindo a nossa aplicação do *Strategy Pattern*. 
+
+
+### Padrões Simples
+* **Speculative Generality e Código Duplicado na função addEmployee**: Após se certificar que o método, apesar de muito semelhante, era inferior em funcionalidades ao construtor da classe e que o mesmo não estava sendo usado em nenhuma parte do sistema, descartou-se o método mantendo apenas o construtor.
+<br>
+
+* **Feature Envy no método undoRedo**: Essa função usava mais métodos e atributos da classe Action ao invés da classe em que estava, sendo assim apliquei o **Move Method** nesse método e o desloquei da classe Actions para Action. 
+<br>
+
+* **Feature Envy no metodo remove**: A função remove da classe Employee, apresenta uma predominância de métodos e atributos da classe Company. Sendo assim, apliquei o **Move Method** e desloquei esse método para a classe mais adequada, nesse caso a classe Company.
+<br>
+
+* **Feature Envy no método getEmployeeByID**: A função anteriormente na classe Employee, apresenta uma predominância de métodos e atributos da classe Company. Sendo assim, apliquei o **Move Method** e desloquei esse método para a classe Company.
+<br>
+
+* **Long Method no método undoRedoControl**: Após o move method, esse método de controle que continuou na classe Actions, permaneceu com ações fora do escopo da sua proposta de funcionalidade, sendo assim performou-se o **Extract Method** e criou-se duas funções auxiliares para realizar essas funções, deixando o código mais limpo e auto explicativo.
