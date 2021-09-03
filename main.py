@@ -1,4 +1,5 @@
-from classes import Company, Employee, Hourly, Commissioned, Payagenda, Action
+from classes import Company, Employee, Hourly, Commissioned, Payagenda, Create, Remove, GeneralTaxes,\
+    AditionalTaxes, Update, UpdateType, MakeSale, ClockIn, ClockOut, PaymentToday
 import datetime as dt
 
 
@@ -18,7 +19,7 @@ def sindicato_func(empresa):
         elif n == "1":
             print(f"Taxa atual: {empresa.syndicate.taxes}")
             taxa_geral = float(input("Informe o valor que deseja adicionar para a taxa geral: "))
-            action = Action(empresa.actions, None, "generaltaxes", empresa.syndicate.taxes)
+            GeneralTaxes(empresa.actions, None, empresa.syndicate.taxes)
             empresa.syndicate.changeGeneralTaxes(taxa_geral)
             print(empresa.syndicate.taxes)
 
@@ -27,17 +28,17 @@ def sindicato_func(empresa):
             taxa_ad = float(input("Informe a taxa adicional de serviço: "))
             e = Employee.getEmployeeByID(empresa, identificador)
             if e:
-                action = Action(empresa.actions, e, "aditionaltaxes", taxa_ad)
+                AditionalTaxes(empresa.actions, e, taxa_ad)
                 empresa.syndicate.plusAditionalTaxes(empresa, identificador, taxa_ad)
 
         elif n == "3":
             print(f"Taxa sindical geral atual:{empresa.syndicate.taxes}")
 
         elif n == "u":
-            empresa.actions.undoRedo(empresa, False)
+            empresa.actions.undoRedoControl(empresa, False)
 
         elif n == "r":
-            empresa.actions.undoRedo(empresa, True)
+            empresa.actions.undoRedoControl(empresa, True)
 
 
 def adicionar_func(empresa):
@@ -93,7 +94,7 @@ def venda(empresa):
             if e and e.jobtype == "C":
                 data = str(input("informe a data da venda: "))
                 valor = float(input("informe o valor da venda: "))
-                action = Action(empresa.actions, e, "sale", [data, valor])
+                MakeSale(empresa.actions, e, [data, valor])
                 e.addSale(data, valor)
                 print("Resultado de venda lançado!")
         elif n == "2":
@@ -104,11 +105,12 @@ def venda(empresa):
                 print("Vendas efetuadas:")
                 for i in e.sales:
                     print (i.value)
+
         elif n == "u":
-            empresa.actions.undoRedo(empresa, False)
+            empresa.actions.undoRedoControl(empresa, False)
 
         elif n == "r":
-            empresa.actions.undoRedo(empresa, True)
+            empresa.actions.undoRedoControl(empresa, True)
 
 
 def cartao(empresa):
@@ -150,7 +152,7 @@ def cartao(empresa):
                         new = Hourly(empresa, e.name, e.address, "H", 0, e.issyndicate, salary_h,
                                      paymethod=e.payment.paymethod, id=e.id)
                         print("Novo cartão de ponto criado!")
-                        action = Action(empresa.actions, new, "updatetype", [e, aindex])
+                        UpdateType(empresa.actions, new, [e, aindex])
 
         elif n == "2":
             identificador = str(input("ID do funcionário: "))
@@ -167,17 +169,17 @@ def cartao(empresa):
                 if h == 1:
                     inicio = int(input("Hora de início: "))
                     e.punchTheClockIn(inicio)
-                    action = Action(empresa.actions, e, "clockin", value=inicio)
+                    ClockIn(empresa.actions, e, value=inicio)
                 elif h == 2:
                     final = int(input("Hora de encerramento: "))
                     e.punchTheClockOut(final, e.workstarthour)
-                    action = Action(empresa.actions, e, "clockout", value=[e.workstarthour, final])
+                    ClockOut(empresa.actions, e, value=[e.workstarthour, final])
 
         elif n == "u":
-            empresa.actions.undoRedo(empresa, False)
+            empresa.actions.undoRedoControl(empresa, False)
 
         elif n == "r":
-            empresa.actions.undoRedo(empresa, True)
+            empresa.actions.undoRedoControl(empresa, True)
 
 
 def funcionario(empresa):
@@ -198,19 +200,19 @@ def funcionario(empresa):
         elif n == "1":
             new = adicionar_func(empresa)
             aindex = empresa.getPayagendaIndex(new)
-            action = Action(empresa.actions, new, "create", aindex)
+            Create(empresa.actions, new, aindex)
             print("Novo funcionario criado!")
             print(f"ID: {new.id}")
 
         elif n == "2":
             identificador = str(input("ID do funcionário: "))
             confirme = input("Realmente deseja remover esse funcionario? (y/n)")
-            e = Employee.getEmployeeByID(empresa, identificador)
-            aindex = empresa.getPayagendaIndex(e)
+            e = Employee.getEmployeeByID(empresa, identificador) #flag
 
             if confirme == "y" and e:
-                action = Action(empresa.actions, e, "remove", aindex)
                 Employee.remove(empresa, identificador)
+                aindex = empresa.getPayagendaIndex(e)
+                Remove(empresa.actions, e, aindex)
                 print("Funcionario removido do sistema")
             else:
                 print("ID inválido. Cerfique-se que o funcionário está no sistema.")
@@ -237,7 +239,7 @@ def funcionario(empresa):
                 else:
                     old = e.getAttribute(aux[a-1])
                     valor = input("Digite o novo valor para o atributo especificado: ")
-                    new_action = Action(empresa.actions, copy, "update", value=old, attribute=aux[a-1])
+                    Update(empresa.actions, copy, value=old, attribute=aux[a-1])
                     e.update(aux[a-1], valor)
 
             else:
@@ -289,7 +291,7 @@ def funcionario(empresa):
                         e.remove(empresa, e.id)
                         new = Employee(empresa, e.name, e.address, x, salary, e.issyndicate, 0, 0,
                                       paymethod=e.payment.paymethod, id=e.id)
-                    action = Action(empresa.actions, new, "updatetype", [e, aindex])
+                    UpdateType(empresa.actions, new, [e, aindex])
                     print("Afiliação do funcionário atualizada!")
 
         elif n == "6":
@@ -364,10 +366,10 @@ def funcionario(empresa):
                 print(f"Nome: {employee.name} | ID: {employee.id} | Afiliação: {employee.jobtype}")
 
         elif n == "u":
-            empresa.actions.undoRedo(empresa, False)
+            empresa.actions.undoRedoControl(empresa, False)
 
         elif n == "r":
-            empresa.actions.undoRedo(empresa, True)
+            empresa.actions.undoRedoControl(empresa, True)
 
 
 def pagamentos(empresa):
@@ -391,7 +393,7 @@ def pagamentos(empresa):
                     list.append(agenda)
 
             empresa.makePayments([d.day, d.month, d.year], empresa.syndicate.taxes)
-            action = Action(empresa.actions, None, "paymentoday", list)
+            PaymentToday(empresa.actions, None, list)
         elif n == "2":
             m = int(input(f"Defina a quantidade de dias a partir de hoje {d.day}/{d.month}/{d.year} "
                           f"ao qual deseja efetuar o pagamento: "))
@@ -450,11 +452,12 @@ def pagamentos(empresa):
                     print(f"Os funcionários são pagos {bs[agenda.type]} na {dias[agenda.day]}")
                 print(f"Próximo dia de pagamento: {agenda.nextpayday[0]}/{agenda.nextpayday[1]}/{agenda.nextpayday[2]}")
                 x += 1
+
         elif n == "u":
-            empresa.actions.undoRedo(empresa, False)
+            empresa.actions.undoRedoControl(empresa, False)
 
         elif n == "r":
-            empresa.actions.undoRedo(empresa, True)
+            empresa.actions.undoRedoControl(empresa, True)
 
 
 def main(empresa):
@@ -483,5 +486,6 @@ c = Company()
 em1 = Hourly(c, "Rafael", "Maceió", "H", 0, "y", salary_h=10, paymethod="Depósito bancário")
 em2 = Commissioned(c, "Carlos", "Arapiraca", "C", 100, "n", 0.5, paymethod="Cheque em mãos")
 em3 = Employee(c, "João", "Recife", "S", 100, "y", 0, 0, paymethod= "Cheque no correio")
+c.cleanStacks()
 
 main(c)

@@ -1,118 +1,165 @@
 from random import randint
+from abc import ABC, abstractmethod
 import calendar
 import time
 import datetime as dt
 
 
-class Actions:
+class Actions():
     def __init__(self):
         self.redostack = []
         self.undostack = []
 
-    def undoRedo(self, company, redo):
-        action = None
+    def pushAction(self, action, redo):
+        if redo:
+            self.undostack.append(action)
+            print(f"Ação refeita")
+        else:
+            self.redostack.append(action)
+            print(f"Ação desfeita")
+
+    def popAction(self, redo):
         if not redo and len(self.undostack) > 0:
-            action = self.undostack.pop()
-        if redo and len(self.redostack) > 0:
-            action = self.redostack.pop()
+            return self.undostack.pop()
+        elif redo and len(self.redostack) > 0:
+            return self.redostack.pop()
 
+    def undoRedoControl(self, company, redo):
+        action = self.popAction(redo)
         if action:
-            if action.type == "remove":
-                company.employees.append(action.ogemployee)
-                company.payagendas[action.attrvalue].employees.append(action.ogemployee)
-                print("Funcionário cadastrado no sistema!")
-                action.type = "create"
-            elif action.type == "create":
-                action.attrvalue = company.getPayagendaIndex(action.ogemployee)
-                action.ogemployee.remove(company, action.ogemployee.id)
-                action.type = "remove"
-                print("Funcionário removido do sistema!")
-            elif action.type == "update":
-                old = action.ogemployee.getAttribute(action.attribute)
-                action.ogemployee.update(action.attribute, action.attrvalue)
-                action.attrvalue = old
-                print("Atributo resetado.")
-                # print(action.attrvalue)
-            elif action.type == "updatetype":
-                if redo:
-                    aux = {"H": 0, "S": 2, "C": 1}
-                    company.payagendas[aux[action.ogemployee.jobtype]].employees.append(action.ogemployee)
-                    Employee.remove(company, action.attrvalue[0].id)
-                    company.employees.append(action.ogemployee)
-                else:
-                    Employee.remove(company, action.ogemployee.id)
-                    company.employees.append(action.attrvalue[0])
-                    company.payagendas[action.attrvalue[1]].employees.append(action.attrvalue[0])
-            elif action.type == "generaltaxes":
-                old = company.syndicate.taxes
-                company.syndicate.taxes = action.attrvalue
-                action.attrvalue = old
-                print("Taxa geral resetada.")
-            elif action.type == "aditionaltaxes":
-                # print(action.ogemployee.aditional_taxes)
-                new = action.attrvalue
-                if redo:
-                    new = new * (-1)
-                action.ogemployee.aditional_taxes -= new
-                print("Taxa adicional resetada")
-                # print(action.ogemployee.aditional_taxes)
-            elif action.type == "sale":
-                if redo:
-                    action.ogemployee.addSale(action.attrvalue[0], action.attrvalue[1])
-                    print(len(action.ogemployee.sales))
-                else:
-                    sale = action.ogemployee.sales.pop()
-                    action.ogemployee.payment.value -= action.ogemployee.comission_amount
-                    action.ogemployee.comission_amount -= (sale.value * action.ogemployee.comission_percent)
-                    print(len(action.ogemployee.sales))
-            elif action.type == "clockin":
-                new = action.attrvalue
-                action.ogemployee.workstarthour = 0
-                if redo:
-                    action.ogemployee.workstarthour += new
-                print("Horário de início de expediente resetado")
-                # print(action.ogemployee.workstarthour)
-            elif action.type == "clockout":
-                employee = action.ogemployee
-                if redo:
-                    employee.punchTheClockOut(action.attrvalue[1], action.attrvalue[0])
-                else:
-                    employee.workendhour = int(action.attrvalue[1])
-                    work_day = employee.workendhour - int(action.attrvalue[0])
-                    employee.hours_amount -= work_day
-                    employee.payment.value -= employee.calculateSalary(work_day)
-                print("Horário de final de expediente resetado")
-                # print(employee.hours_amount)
-                # print(employee.payment.value)
-            elif action.type == "paymentoday":
-                d = dt.date.today()
-                if redo:
-                    print("Pagamentos do dia refeitos")
-                    company.makePayments([d.day, d.month, d.year], company.syndicate.taxes)
-                else:
-                    print("Pagamentos do dia desfeitos")
-                    for agenda in action.attrvalue:
-                        agenda.nextpayday = [d.day, d.month, d.year]
-
-            if redo:
-                self.undostack.append(action)
-                print(f"Ação refeita")
-            else:
-                self.redostack.append(action)
-                print(f"Ação desfeita")
-            # print(f"tamanho da pilha de undo: {len(self.undostack)}")
-            # print(f"tamanho da pilha de redo: {len(self.redostack)}")
+            action.undoRedo(company, redo)
+            self.pushAction(action, redo)
+        print(f"undostack: {len(self.undostack)} redostack: {len(self.redostack)}")
 
 
-class Action:
-    def __init__(self, actions, employee, type = None, value = None, attribute = None):
-        self.type = type
+class Action(ABC):
+    def __init__(self, actions, employee, value=None, attribute=None):
         self.ogemployee = employee
         self.attribute = attribute
         self.attrvalue = value
         actions.undostack.append(self)
         if len(actions.redostack) > 0:
             actions.redostack = []
+
+    @abstractmethod
+    def undoRedo(self, company, redo):
+        pass
+
+
+class Create(Action):
+    def undoRedo(self, company, redo):
+        if redo:
+            company.employees.append(self.ogemployee)
+            company.payagendas[self.attrvalue].employees.append(self.ogemployee)
+            print("Funcionário cadastrado no sistema!")
+        else:
+            self.attrvalue = company.getPayagendaIndex(self.ogemployee)
+            self.ogemployee.remove(company, self.ogemployee.id)
+            print("Funcionário removido do sistema!")
+
+
+class Remove(Action):
+    def undoRedo(self, company, redo):
+        if redo:
+            self.attrvalue = company.getPayagendaIndex(self.ogemployee)
+            self.ogemployee.remove(company, self.ogemployee.id)
+            print("Funcionário removido do sistema!")
+
+        else:
+            company.employees.append(self.ogemployee)
+            company.payagendas[self.attrvalue].employees.append(self.ogemployee)
+            print("Funcionário cadastrado no sistema!")
+
+
+class Update(Action):
+    def undoRedo(self, company, redo):
+        old = self.ogemployee.getAttribute(self.attribute)
+        self.ogemployee.update(self.attribute, self.attrvalue)
+        self.attrvalue = old
+        print("Atributo resetado.")
+        # print(action.attrvalue)
+
+
+class UpdateType(Action):
+    def undoRedo(self, company, redo):
+
+        if redo:
+            aux = {"H": 0, "S": 2, "C": 1}
+            company.payagendas[aux[self.ogemployee.jobtype]].employees.append(self.ogemployee)
+            Employee.remove(company, self.attrvalue[0].id)
+            company.employees.append(self.ogemployee)
+        else:
+            Employee.remove(company, self.ogemployee.id)
+            company.employees.append(self.attrvalue[0])
+            company.payagendas[self.attrvalue[1]].employees.append(self.attrvalue[0])
+
+
+class GeneralTaxes(Action):
+    def undoRedo(self, company, redo):
+        old = company.syndicate.taxes
+        company.syndicate.taxes = self.attrvalue
+        self.attrvalue = old
+        print("Taxa geral resetada.")
+
+
+class AditionalTaxes(Action):
+    def undoRedo(self, company, redo):
+        # print(action.ogemployee.aditional_taxes)
+        new = self.attrvalue
+        if redo:
+            new = new * (-1)
+        self.ogemployee.aditional_taxes -= new
+        print("Taxa adicional resetada")
+        # print(action.ogemployee.aditional_taxes)
+
+
+class MakeSale(Action):
+    def undoRedo(self, company, redo):
+        if redo:
+            self.ogemployee.addSale(self.attrvalue[0], self.attrvalue[1])
+            print(len(self.ogemployee.sales))
+        else:
+            sale = self.ogemployee.sales.pop()
+            self.ogemployee.payment.value -= self.ogemployee.comission_amount
+            self.ogemployee.comission_amount -= (sale.value * self.ogemployee.comission_percent)
+            print(len(self.ogemployee.sales))
+
+
+class ClockIn(Action):
+    def undoRedo(self, company, redo):
+        new = self.attrvalue
+        self.ogemployee.workstarthour = 0
+        if redo:
+            self.ogemployee.workstarthour += new
+        print("Horário de início de expediente resetado")
+        # print(action.ogemployee.workstarthour)
+
+
+class ClockOut(Action):
+    def undoRedo(self, company, redo):
+        employee = self.ogemployee
+        if redo:
+            employee.punchTheClockOut(self.attrvalue[1], self.attrvalue[0])
+        else:
+            employee.workendhour = int(self.attrvalue[1])
+            work_day = employee.workendhour - int(self.attrvalue[0])
+            employee.hours_amount -= work_day
+            employee.payment.value -= employee.calculateSalary(work_day)
+        print("Horário de final de expediente resetado")
+        # print(employee.hours_amount)
+        # print(employee.payment.value)
+
+
+class PaymentToday(Action):
+    def undoRedo(self, company, redo):
+        d = dt.date.today()
+        if redo:
+            print("Pagamentos do dia refeitos")
+            company.makePayments([d.day, d.month, d.year], company.syndicate.taxes)
+        else:
+            print("Pagamentos do dia desfeitos")
+            for agenda in self.attrvalue:
+                agenda.nextpayday = [d.day, d.month, d.year]
 
 
 class Company:
@@ -294,6 +341,7 @@ class Employee:
 
         if self.jobtype == "S":
             company.payagendas[2].employees.append(self)
+
 
     def resetPaymentS(self):
         self.payment.value = 0
