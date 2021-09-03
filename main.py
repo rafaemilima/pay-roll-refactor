@@ -26,7 +26,7 @@ def sindicato_func(empresa):
         elif n == "2":
             identificador = input("Informe o identificador do funcionário: ")
             taxa_ad = float(input("Informe a taxa adicional de serviço: "))
-            e = Employee.getEmployeeByID(empresa, identificador)
+            e = empresa.getEmployeeByID(identificador)
             if e:
                 AditionalTaxes(empresa.actions, e, taxa_ad)
                 empresa.syndicate.plusAditionalTaxes(empresa, identificador, taxa_ad)
@@ -90,7 +90,7 @@ def venda(empresa):
             return
         elif n == "1":
             identificador = str(input("ID do funcionário: "))
-            e = Employee.getEmployeeByID(empresa, identificador)
+            e = empresa.getEmployeeByID(identificador)
             if e and e.jobtype == "C":
                 data = str(input("informe a data da venda: "))
                 valor = float(input("informe o valor da venda: "))
@@ -99,7 +99,7 @@ def venda(empresa):
                 print("Resultado de venda lançado!")
         elif n == "2":
             identificador = str(input("ID do funcionário: "))
-            e = Employee.getEmployeeByID(empresa, identificador)
+            e = empresa.getEmployeeByID(identificador)
             if e and e.jobtype == "C":
                 print(f"Comissão total: {e.comission_amount}")
                 print("Vendas efetuadas:")
@@ -129,10 +129,10 @@ def cartao(empresa):
             print("Essa operação adiciona um cartão de ponto a um funcionário com uma afiliação que não seja horista.")
             print("Informe o ID do funcionário para continuar ou 0 para cancelar a operação")
             identificador = str(input("ID do funcionário: "))
-            e = Employee.getEmployeeByID(empresa, identificador)
+            e = empresa.getEmployeeByID(identificador)
             while not e:
                 identificador = str(input("Informe um novo ID ou digite 0 para cancelar a operação: "))
-                e = Employee.getEmployeeByID(empresa, identificador)
+                e = empresa.getEmployeeByID(identificador)
                 if identificador == "0":
                     print("Operação cancelada")
                     e = None
@@ -156,11 +156,11 @@ def cartao(empresa):
 
         elif n == "2":
             identificador = str(input("ID do funcionário: "))
-            e = Employee.getEmployeeByID(empresa, identificador)
+            e = empresa.getEmployeeByID(identificador)
             while not e:
                 print("ID inválido")
                 identificador = str(input("ID do funcionário: "))
-                e = Employee.getEmployeeByID(empresa, identificador)
+                e = empresa.getEmployeeByID(identificador)
             if e.jobtype != "H":
                 print("O funcionário informado não é horista!")
 
@@ -207,10 +207,10 @@ def funcionario(empresa):
         elif n == "2":
             identificador = str(input("ID do funcionário: "))
             confirme = input("Realmente deseja remover esse funcionario? (y/n)")
-            e = Employee.getEmployeeByID(empresa, identificador) #flag
+            e = empresa.getEmployeeByID(identificador)
 
             if confirme == "y" and e:
-                Employee.remove(empresa, identificador)
+                empresa.remove(identificador)
                 aindex = empresa.getPayagendaIndex(e)
                 Remove(empresa.actions, e, aindex)
                 print("Funcionario removido do sistema")
@@ -219,7 +219,7 @@ def funcionario(empresa):
 
         elif n == "3":
             identificador = str(input("ID do funcionário: "))
-            e = Employee.getEmployeeByID(empresa, identificador)
+            e = empresa.getEmployeeByID(identificador)
             if e:
                 e.info()
             else:
@@ -227,7 +227,7 @@ def funcionario(empresa):
 
         elif n == "4":
             identificador = str(input("ID do funcionário: "))
-            e = Employee.getEmployeeByID(empresa, identificador)
+            e = empresa.getEmployeeByID(identificador)
             copy = e
             if e:
                 aux = ["name", "salary", "syndicate", "address", "paymethod", "salary_h", "comission"]
@@ -247,7 +247,7 @@ def funcionario(empresa):
 
         elif n == "5":
             identificador = str(input("ID do funcionário: "))
-            e = Employee.getEmployeeByID(empresa, identificador)
+            e = empresa.getEmployeeByID(identificador)
             aux3 = {"H": "Horista", "S": "Assalariado", "C": "Comissionado"}
             if e:
                 print(f"O tipo atual do funcionário é: {aux3[e.jobtype]}")
@@ -296,7 +296,7 @@ def funcionario(empresa):
 
         elif n == "6":
             identificador = str(input("ID do funcionário: "))
-            e = Employee.getEmployeeByID(empresa, identificador)
+            e = empresa.getEmployeeByID(identificador)
             aux1 = ["y", "n"]
             set = False
             if e:

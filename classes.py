@@ -86,10 +86,10 @@ class UpdateType(Action):
         if redo:
             aux = {"H": 0, "S": 2, "C": 1}
             company.payagendas[aux[self.ogemployee.jobtype]].employees.append(self.ogemployee)
-            Employee.remove(company, self.attrvalue[0].id)
+            company.remove(self.attrvalue[0].id)
             company.employees.append(self.ogemployee)
         else:
-            Employee.remove(company, self.ogemployee.id)
+            company.remove(self.ogemployee.id)
             company.employees.append(self.attrvalue[0])
             company.payagendas[self.attrvalue[1]].employees.append(self.attrvalue[0])
 
@@ -199,6 +199,23 @@ class Company:
         self.payagendas.append(weekly)
         self.payagendas.append(bimonthly)
         self.payagendas.append(monthly)
+
+    def getEmployeeByID(self, s_id):
+        for employee in self.employees:
+            if employee.id == int(s_id):
+                return employee
+        return None
+
+    def remove(self, s_id):
+        e = self.getEmployeeByID(s_id)
+        for agenda in self.payagendas:
+            if e in agenda.employees:
+                agenda.employees.remove(e)
+        for i in self.employees:
+            if i.id == int(s_id):
+                self.employees.remove(i)
+                del(i)
+        return
 
     @staticmethod
     def addPayagenda(wday, type, period):
@@ -404,28 +421,6 @@ class Employee:
             self.comission = value
         return
 
-
-    @staticmethod
-    def getEmployeeByID(company, s_id):
-        for i in company.employees:
-            if i.id == int(s_id):
-                return i
-        return None
-
-    @staticmethod
-    def remove(company, s_id):
-        e = Employee.getEmployeeByID(company, s_id)
-        for agenda in company.payagendas:
-            if e in agenda.employees:
-                agenda.employees.remove(e)
-        for i in company.employees:
-            if i.id == int(s_id):
-                company.employees.remove(i)
-                del(i)
-
-        return
-
-
     @staticmethod
     def takeIDs(company):
         ids = []
@@ -523,14 +518,14 @@ class Syindicate:
 
 
     @staticmethod
-    def signSyindicate(empresa, employee_id, aditional_taxes = 0):
-        employee = Employee.getEmployeeByID(empresa, employee_id)
+    def signSyindicate(company, employee_id, aditional_taxes = 0):
+        employee = company.getEmployeeByID(employee_id)
         employee.aditional_taxes = aditional_taxes
         employee.issyndicate = True
 
     @staticmethod
-    def plusAditionalTaxes(empresa, employee_id, aditional_taxes):
-        employee = Employee.getEmployeeByID(empresa, employee_id)
+    def plusAditionalTaxes(company, employee_id, aditional_taxes):
+        employee = company.getEmployeeByID(employee_id)
         employee.aditional_taxes += aditional_taxes
 
 
@@ -550,7 +545,7 @@ class PointCard:
 
 
     def addCard(self, company, employeeid, salary_h):
-        employee = Employee.getEmployeeByID(company, employeeid)
+        employee = company.getEmployeeByID(employeeid)
         if employee.card is None:
             self.cardid = employeeid
             self.employee = employee
