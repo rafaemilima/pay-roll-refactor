@@ -54,7 +54,7 @@ class Create(Action):
             print("Funcionário cadastrado no sistema!")
         else:
             self.attrvalue = company.getPayagendaIndex(self.ogemployee)
-            self.ogemployee.remove(company, self.ogemployee.id)
+            company.remove(self.ogemployee.id)
             print("Funcionário removido do sistema!")
 
 
@@ -62,7 +62,7 @@ class Remove(Action):
     def undoRedo(self, company, redo):
         if redo:
             self.attrvalue = company.getPayagendaIndex(self.ogemployee)
-            self.ogemployee.remove(company, self.ogemployee.id)
+            company.remove(self.ogemployee.id)
             print("Funcionário removido do sistema!")
 
         else:
