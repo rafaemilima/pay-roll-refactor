@@ -28,6 +28,9 @@ Nesse repositório serão identificados e corrigidos alguns code smells do siste
 ## Code Smells solucionados
 
 ### Padrões Simples
+
+Nos padrãos simples referentes ao método undoRedo é importante mencionar que devido à extensão do método foi apresentada apenas uma pequena amostragem do método para demonstrar os padrões adotados. Caso queira conferir o método refatorado completo, avance para os padrões complexos. Ademais, o restante dos métodos à seguir demonstra os métodos refatorados por completo.
+
 * **Speculative Generality e Código Duplicado na função addEmployee**: Após se certificar que o método, apesar de muito semelhante, era inferior em funcionalidades ao construtor da classe e que o mesmo não estava sendo usado em nenhuma parte do sistema, descartou-se o método mantendo apenas o construtor.
 <br>
 
@@ -78,17 +81,17 @@ class Actions:
 
 class Action:
     def undoRedo(self, company, redo):
-    if self.type == "create":
-        self.attrvalue = company.getPayagendaIndex(self.ogemployee)
-        self.ogemployee.remove(company, self.ogemployee.id)
-        self.type = "remove"
-        print("Funcionário removido do sistema!")
-    elif self.type == "update":
-        old = self.ogemployee.getAttribute(self.attribute)
-        self.ogemployee.update(self.attribute, self.attrvalue)
-        self.attrvalue = old
-        print("Atributo resetado.")
-        # print(action.attrvalue)
+        if self.type == "create":
+            self.attrvalue = company.getPayagendaIndex(self.ogemployee)
+            self.ogemployee.remove(company, self.ogemployee.id)
+            self.type = "remove"
+            print("Funcionário removido do sistema!")
+        elif self.type == "update":
+            old = self.ogemployee.getAttribute(self.attribute)
+            self.ogemployee.update(self.attribute, self.attrvalue)
+            self.attrvalue = old
+            print("Atributo resetado.")
+            # print(action.attrvalue)
     
 ```
 
