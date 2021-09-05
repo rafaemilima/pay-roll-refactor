@@ -35,6 +35,7 @@ Nesse repositório serão identificados e corrigidos alguns code smells do siste
 
 ``` python
 # ANTES DO MOVE METHOD
+
 class Actions:
     def undoRedo(self, company, redo):
         # Após o pop da stack apropriada, se manipulava todos os atributos 
@@ -55,10 +56,11 @@ class Actions:
              action.ogemployee.update(action.attribute, action.attrvalue)
              action.attrvalue = old
              print("Atributo resetado.")
-    ```
+```
 
 ``` python
 # APÓS O MOVE METHOD
+
 class Actions:
     def undoRedoControl(self, company, redo):
         action = None
@@ -95,7 +97,9 @@ class Action:
 * **Feature Envy no metodo remove**: A função remove da classe Employee, apresenta uma predominância de métodos e atributos da classe Company. Sendo assim, apliquei o **Move Method** e desloquei esse método para a classe mais adequada, nesse caso a classe Company.
 
 ``` python
-    # ANTES DA REFATORAÇÃO
+# ANTES DO MOVE METHOD
+
+class Employee:
     @staticmethod
     def remove(company, s_id):
         e = Employee.getEmployeeByID(company, s_id)
@@ -111,7 +115,9 @@ class Action:
 ```
 
 ```python
-    # APÓS A REFATORAÇÃO
+# APÓS O MOVE METHOD
+
+class Company:
     def remove(self, s_id):
         e = self.getEmployeeByID(s_id)
         for agenda in self.payagendas:
@@ -128,7 +134,9 @@ class Action:
 * **Feature Envy no método getEmployeeByID**: A função anteriormente na classe Employee, apresenta uma predominância de métodos e atributos da classe Company. Sendo assim, apliquei o **Move Method** e desloquei esse método para a classe Company.
 
 ``` python
-    # ANTES DA REFATORAÇÃO
+# ANTES DO MOVE METHOD
+
+class Employee:
     @staticmethod
     def getEmployeeByID(company, s_id):
         for i in company.employees:
@@ -138,7 +146,9 @@ class Action:
 ```
 
 ``` python
-    # APÓS A REFATORAÇÃO
+# APÓS O MOVE METHOD
+
+class Company:
     def getEmployeeByID(self, s_id):
         for employee in self.employees:
             if employee.id == int(s_id):
@@ -150,7 +160,8 @@ class Action:
 * **Long Method no método undoRedoControl**: Após o move method, esse método de controle que continuou na classe Actions, permaneceu com ações fora do escopo da sua proposta de funcionalidade, sendo assim performou-se o **Extract Method** e criou-se duas funções auxiliares para realizar essas funções, deixando o código mais limpo e auto explicativo.
 
 ```python
-   # ANTES DA REFATORAÇÃO
+# ANTES DO EXTRACT METHOD
+
    def undoRedoControl(self, company, redo):
         action = None
         if not redo and len(self.undostack) > 0:
@@ -165,8 +176,9 @@ class Action:
             self.redostack.append(action)
             print(f"Ação desfeita")
 ```
+
 ```python
-   # APÓS A REFATORAÇÃO
+# APÓS O EXTRACT METHOD
    
    def pushAction(self, action, redo):
         if redo:
@@ -195,7 +207,8 @@ class Action:
 * **Long Method no método undoRedo**: Apois ser deslocado para a classe Action usando o **Move Method**, para cada tomada de decisão principal desse método foi criada uma subclasse correspondente da classe Action. Cada subclasse fazia uso do método abstrato undoRedo de Action, concluindo a nossa aplicação do *Strategy Pattern*.
 
 ``` python
-    # ANTES DA APLICAÇÃO DO STRATEGY PATTERN
+# ANTES DA APLICAÇÃO DO STRATEGY PATTERN
+
 class Actions:
     def __init__(self):
         self.redostack = []
@@ -295,7 +308,8 @@ class Actions:
 ```
 
 ``` python
-    # APÓS A APLICAÇÃO DO STRATEGY PATTERN
+# APÓS A APLICAÇÃO DO STRATEGY PATTERN
+
 class Action(ABC):
     def __init__(self, actions, employee, value=None, attribute=None):
         self.ogemployee = employee
