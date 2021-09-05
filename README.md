@@ -34,29 +34,48 @@ Nesse repositório serão identificados e corrigidos alguns code smells do siste
 * **Feature Envy no método undoRedo**: Essa função usava mais métodos e atributos da classe Action ao invés da classe em que estava, sendo assim apliquei o **Move Method** nesse método e o desloquei da classe Actions para Action. 
 
 ``` python
-    # ANTES DO MOVE METHOD
-    # Após o pop da stack apropriada, se manipulava todos os atributos 
-    # de um objeto da classe Action dentro da classe Actions
-    action = None
-    if not redo and len(self.undostack) > 0:
-        action = self.undostack.pop()
-    if redo and len(self.redostack) > 0:
-        action = self.redostack.pop()
-    # Exemplo da feature envy nos ifs do método UndoRedo:
-    if action.type == "create":
-         action.attrvalue = company.getPayagendaIndex(action.ogemployee)
-         action.ogemployee.remove(company, action.ogemployee.id)
-         action.type = "remove"
-         print("Funcionário removido do sistema!")
-    elif action.type == "update":
-         old = action.ogemployee.getAttribute(action.attribute)
-         action.ogemployee.update(action.attribute, action.attrvalue)
-         action.attrvalue = old
-         print("Atributo resetado.")
-```
+# ANTES DO MOVE METHOD
+class Actions:
+    def undoRedo(self, company, redo):
+        # Após o pop da stack apropriada, se manipulava todos os atributos 
+        # de um objeto da classe Action dentro da classe Actions
+        action = None
+        if not redo and len(self.undostack) > 0:
+            action = self.undostack.pop()
+        if redo and len(self.redostack) > 0:
+            action = self.redostack.pop()
+        # Exemplo da feature envy nos ifs do método UndoRedo:
+        if action.type == "create":
+             action.attrvalue = company.getPayagendaIndex(action.ogemployee)
+             action.ogemployee.remove(company, action.ogemployee.id)
+             action.type = "remove"
+             print("Funcionário removido do sistema!")
+        elif action.type == "update":
+             old = action.ogemployee.getAttribute(action.attribute)
+             action.ogemployee.update(action.attribute, action.attrvalue)
+             action.attrvalue = old
+             print("Atributo resetado.")
+    ```
 
 ``` python
-    # APÓS O MOVE METHOD
+# APÓS O MOVE METHOD
+class Actions:
+    def undoRedoControl(self, company, redo):
+        action = None
+        if not redo and len(self.undostack) > 0:
+            action = self.undostack.pop()
+        if redo and len(self.redostack) > 0:
+            action = self.redostack.pop()
+        action.undoRedo(company, redo)
+        if redo:
+            self.undostack.append(action)
+            print(f"Ação refeita")
+        else:
+            self.redostack.append(action)
+            print(f"Ação desfeita")
+
+class Action:
+    def undoRedo(self, company, redo):
     if self.type == "create":
         self.attrvalue = company.getPayagendaIndex(self.ogemployee)
         self.ogemployee.remove(company, self.ogemployee.id)
