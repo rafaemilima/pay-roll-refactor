@@ -8,173 +8,18 @@ Nesse repositório serão identificados e corrigidos alguns code smells do siste
 
 ## Code Smells Detectados
 
-* Long method e Feature envy: Na classe Actions, o método undoRedo() apresenta diversos ifs e elses, além de ser um método bastante extenso no número de linhas. Além disso, o método faz mais uso dos métodos da classe Action, do que da classe Actions. Segue abaixo um overview da quantidade de decisões efetuadas no método:
-<br>
-
-``` python    
-  def undoRedo(self, company, redo):
-        action = None
-        if not redo and len(self.undostack) > 0:
-        if redo and len(self.redostack) > 0:
-
-        if action:
-            if action.type == "remove":
-            
-            elif action.type == "create":
-            
-            elif action.type == "update":
-            
-            elif action.type == "updatetype":
-                if redo:
-                else:
-                
-            elif action.type == "generaltaxes":
-            elif action.type == "aditionaltaxes":
-                if redo:
-
-            elif action.type == "sale":
-                if redo:
-                else:
-
-            elif action.type == "clockin":
-                if redo:
-
-            elif action.type == "clockout":
-                if redo:
-                else:
-                    
-            elif action.type == "paymentoday":
-                if redo:
-                else:
-
-            if redo:
-            else:
-
-```
-
-<br>
-
-* Long method: Na classe Payagenda, o método getNextPayday() apresenta diversos ifs.
-``` python
-    def getNextPayday(self, month, today):
-        d = dt.date(today[2], today[1], today[0])
-        if self.type == "W":
-            if len(self.nextpayday) == 0:
-                while d.weekday() != self.day:
-                    d += dt.timedelta(1)
-            else:
-                d += dt.timedelta(7)
-
-            list = [d.day, d.month, d.year]
-            self.nextpayday = list
-
-        elif self.type == "M":
-            list = []
-            if self.period == "end":
-                h = self.getLastBusinessDay(2021, month)
-                list = [h, month, d.year]
-            elif self.period == "middle":
-                if d.day > 15:
-                    month += 1
-                list = [15, month, d.year]
-            elif self.period == "beggining":
-                if d.day > 1:
-                    month += 1
-                list = [1, month, d.year]
-
-            self.nextpayday = list
-
-        elif self.type == "B":
-            if len(self.nextpayday) == 0:
-                while d.weekday() != self.day:
-                    d += dt.timedelta(1)
-            else:
-                d += dt.timedelta(14)
-            list = [d.day, d.month, d.year]
-            self.nextpayday = list
-```
-
-<br>
-
-* Long method e código duplicado: Na classe employee temos os métodos update e get attribute que apresentam a mesma estrutura semântica e que tem diveros ifs e elses.
-``` python
-    def getAttribute(self, parameter):
-        if parameter == "name":
-            return self.name
-        elif parameter == "salary":
-            return self.salary
-        elif parameter == "syndicate":
-            return self.issyndicate
-        elif parameter == "comission":
-            return self.comission
-        elif parameter == "address":
-            return self.address
-        elif parameter == "paymethod":
-            return self.payment.paymethod
-        elif parameter == "salary_h":
-            return self.salary_h
-        elif parameter == "comission":
-            return self.comission
-
-    def update(self, parameter, value):
-        if parameter == "name":
-            self.name = value
-        elif parameter == "salary":
-            self.salary = value
-        elif parameter == "syndicate":
-            self.issyndicate = value
-        elif parameter == "comission":
-            self.comission = value
-        elif parameter == "address":
-            self.address = value
-        elif parameter == "paymethod":
-            self.payment.paymethod = value
-        elif parameter == "salary_h":
-            self.salary_h = value
-        elif parameter == "comission":
-            self.comission = value
-        return
-```
-<br>
-
-* Speculative generality e código duplicado: Na classe Employee temos um método de adicionar employee que realiza a mesma função do construtor e não está sendo usado.
-``` python
-    def addEmployee(self, company, name, address, jobtype, salary, issyndicate, salary_h, comission, id = None):
-        if self.id:
-            self.id = id
-        else:
-            self.id = self.defineID(company)
-
-        self.name = name
-        self.address = address
-        self.jobtype = jobtype
-        self.salary = salary
-        self.issyndicate = issyndicate
-        self.salary_h = salary_h
-        self.comission = comission
-        company.employees.append(self)
-```
-<br>
-
-* Primitive obcession: O atributo endereço da classe Employee está sendo tratada como uma string.
-``` python
-  endereco = input("Endereço: ")
-```
-<br>
-
-* Primitive obcession: O atributo data nas vendas está sendo tratado como uma string.
-``` python
-  data = input("informe a data da venda: ")
-```
-
-* Feature envy: O método remove na classe Employee, faz mais uso de métodos e atributos da classe Company.
-
-<br>
+|       Smell Detectado      | Fonte                                                                                                                                                                                                                                                                                                                                           | Padrões e estratégias de refatoração                                                                                                                                                                  |
+|:--------------------------:|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Long Method**            | - Método **undoRedo** na classe **Actions** é bastante extenso em linhas, além de ter várias ifs e elses, bem como realizar ações que fogem do seu escopo inicial de ação e que são comuns à todas as decisões. <br><br>  - Métodos **update** e **getAttribute** da classe  **Employee** apresentam diversas tomadas de decisão  de if e else. | **Extract Method** para os passos comuns para cada decisão, seguida da aplicação do **Strategy Pattern**, transformando cada decisão em uma subclasse, aplicando conceitos de herança e polimorfismo. |
+| **Código Duplicado**       | - Métodos **update** e **getAttribute** apresentam a mesma estrutura de tomadas de decisão, apenas  diferindo em um passo que toma.<br><br>  - Método **addEmployee** na classe **Employee** apresenta o código com notáveis similaridades com o construtor de classe.                                                                          | **Extract Method** para os passos comum aos métodos.                                                                                                                                                  |
+| **Speculative generality** | - Método **addEmployee** na classe **Employee**  não está sendo usado em nenhum local da aplicação.                                                                                                                                                                                                                                             | **Remove Method**, como o método se faz  desnecessário, o removeremos do código em detrimento do construtor.                                                                                          |
+| **Primitive obcession**    | - Atributo **address** na classe **Employee** está sendo tratado como uma string.                                                                                                                                                                                                                                                               | **Replace data value with object**, criar um objeto endereço associado à classe empregado  com todos os atributos necessários                                                                         |
+| **Feature Envy**           | - Método **remove** na classe **Employee** usa mais atributos e métodos da classe Company.<br><br> - Método **getEmployeeByID** na classe **Employee** usa mais atributos e métodos da classe Company.<br><br> - Método **undoRedo** na classe **Actions** manipula mais atributos da classe Action.                                            | **Move Method** aplicado para levar  os métodos para as classes mais apropriadas.                                                                                                                     |
 
 ## Padrões a serem aplicados
 
 * Na resolução da **duplicação de código**, farei uso do **extract method** juntamente com o **template method**. 
-* Para solucionar os smells **Long Method**, farei uso de padrões que combinam hierarquia e polimorfismo, como o padrão Strategy.
+* Para solucionar os smells **Long Method**, farei uso de padrões que combinam hierarquia e polimorfismo, com o padrão Strategy.
 * Para solucionar os smells de **primitive obcession**, usarei o padrão replace data value with object.
 * Para solucinar o smell de Speculative generality, removerei o método que não está em uso.
 * Para solucionar os smells de Feature Envy farei uso do padrão move method.
