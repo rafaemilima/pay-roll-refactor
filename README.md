@@ -38,37 +38,36 @@ Nesse repositório serão identificados e corrigidos alguns code smells do siste
     # Após o pop da stack apropriada, se manipulava todos os atributos 
     # de um objeto da classe Action dentro da classe Actions
     action = None
-        if not redo and len(self.undostack) > 0:
-            action = self.undostack.pop()
-        if redo and len(self.redostack) > 0:
-            action = self.redostack.pop()
+    if not redo and len(self.undostack) > 0:
+        action = self.undostack.pop()
+    if redo and len(self.redostack) > 0:
+        action = self.redostack.pop()
     # Exemplo da feature envy nos ifs do método UndoRedo:
-     elif action.type == "create":
-                action.attrvalue = company.getPayagendaIndex(action.ogemployee)
-                action.ogemployee.remove(company, action.ogemployee.id)
-                action.type = "remove"
-                print("Funcionário removido do sistema!")
-     elif action.type == "update":
-                old = action.ogemployee.getAttribute(action.attribute)
-                action.ogemployee.update(action.attribute, action.attrvalue)
-                action.attrvalue = old
-                print("Atributo resetado.")
-                # print(action.attrvalue)
+    if action.type == "create":
+         action.attrvalue = company.getPayagendaIndex(action.ogemployee)
+         action.ogemployee.remove(company, action.ogemployee.id)
+         action.type = "remove"
+         print("Funcionário removido do sistema!")
+    elif action.type == "update":
+         old = action.ogemployee.getAttribute(action.attribute)
+         action.ogemployee.update(action.attribute, action.attrvalue)
+         action.attrvalue = old
+         print("Atributo resetado.")
 ```
 
 ``` python
     # APÓS O MOVE METHOD
-    elif self.type == "create":
-                self.attrvalue = company.getPayagendaIndex(self.ogemployee)
-                self.ogemployee.remove(company, self.ogemployee.id)
-                self.type = "remove"
-                print("Funcionário removido do sistema!")
+    if self.type == "create":
+        self.attrvalue = company.getPayagendaIndex(self.ogemployee)
+        self.ogemployee.remove(company, self.ogemployee.id)
+        self.type = "remove"
+        print("Funcionário removido do sistema!")
     elif self.type == "update":
-                old = self.ogemployee.getAttribute(self.attribute)
-                self.ogemployee.update(self.attribute, self.attrvalue)
-                self.attrvalue = old
-                print("Atributo resetado.")
-                # print(action.attrvalue)
+        old = self.ogemployee.getAttribute(self.attribute)
+        self.ogemployee.update(self.attribute, self.attrvalue)
+        self.attrvalue = old
+        print("Atributo resetado.")
+        # print(action.attrvalue)
     
 ```
 
