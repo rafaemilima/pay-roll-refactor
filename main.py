@@ -1,5 +1,5 @@
-from classes import Company, Employee, Hourly, Commissioned, Payagenda, Create, Remove, GeneralTaxes,\
-    AditionalTaxes, Update, UpdateType, MakeSale, ClockIn, ClockOut, PaymentToday, Address
+from classes import Company, Employee, Hourly, Commissioned, Create, Remove, GeneralTaxes,\
+    AditionalTaxes, Update, UpdateType, MakeSale, ClockIn, ClockOut, PaymentToday, Address, AgendaW, AgendaB, AgendaM
 import datetime as dt
 
 
@@ -343,8 +343,7 @@ def funcionario(empresa):
                                     set = True
                             if not set:
                                 agenda.employees.remove(e)
-                                new = Payagenda()
-                                new.assumePayagenda("M", None, aux2[period - 1])
+                                new = AgendaM(None, aux2[period - 1])
                                 new.employees.append(e)
                                 empresa.payagendas.append(new)
                             print("Sua agenda de pagamento foi atualizada!")
@@ -353,8 +352,6 @@ def funcionario(empresa):
                     days = ["segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira"]
                     print("------Agenda atual------")
                     tipo = "semanal"
-                    if agenda.type == "B":
-                        tipo = "bissemanal"
                     print(f"Agenda de pagamento {tipo}")
                     print(f"Pagamentos realizados na {days[agenda.day]}")
                     confirme = input("Deseja alterar o dia de pagamento? (y, n)\n")
@@ -371,9 +368,11 @@ def funcionario(empresa):
                                     a.employees.append(e)
                                     set = True
                             if not set:
+                                new = AgendaW(day - 1, None)
+                                if agenda.type == "B":
+                                    tipo = "bissemanal"
+                                    new = AgendaB(day - 1, None)
                                 agenda.employees.remove(e)
-                                new = Payagenda()
-                                new.assumePayagenda(agenda.type, day - 1, None)
                                 new.employees.append(e)
                                 empresa.payagendas.append(new)
                             print("Sua agenda de pagamento foi atualizada!")
@@ -429,11 +428,11 @@ def pagamentos(empresa):
                 print("Tipo inválido.")
             else:
                 aux2 = ["beggining", "middle", "end"]
-                new = Payagenda()
+
                 if type == "M":
                     period = int(input("Informe o período do mês em que deseja ser pago:\n1 - Início do mês (dia 1)\n"
                                        "2 - Meio do mês (dia 15)\n3 - Final do mês (último dia útil)\n"))
-                    new.assumePayagenda(type, None, aux2[period-1])
+                    new = AgendaM(None, aux2[period-1])
                     for agenda in empresa.payagendas:
                         if new.period == agenda.period:
                             print("Agenda já cadastrada!")
@@ -444,12 +443,14 @@ def pagamentos(empresa):
                         print("A nova agenda foi cadastrada!")
 
                 else:
+                    new = AgendaB(day - 1, None)
+                    if type == "W":
+                        new = AgendaW(day - 1, None)
                     day = int(input("Digite o dia da semana que o pagamento ocorrerá:\n"
                                     "1 - segunda\n2 - terça\n3 - quarta\n4 - quinta\n5 - sexta\n"))
-                    new.assumePayagenda(type, day - 1, None)
 
                     for agenda in empresa.payagendas:
-                        if new.day == agenda.day and new.type == agenda.type:
+                        if new.day == agenda.day and type == agenda.type:
                             print("Agenda já cadastrada!")
                             set = True
                     if not set:
@@ -462,14 +463,14 @@ def pagamentos(empresa):
             bs = {"W": "semanalmente", "B": "bissemanalmente"}
             dias = ["segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira"]
             for agenda in empresa.payagendas:
-
+                tipo = agenda.returnType()
                 print(f"---------AGENDA {x}---------")
-                print(f"Tipo da agenda: {tipos[agenda.type]}")
+                print(f"Tipo da agenda: {tipos[tipo]}")
                 print(f"Número de funcionários registrados: {len(agenda.employees)}")
-                if agenda.type == "M":
+                if tipo == "M":
                     print(f"Os funcionários são pagos mensalmente {periodos[agenda.period]}")
                 else:
-                    print(f"Os funcionários são pagos {bs[agenda.type]} na {dias[agenda.day]}")
+                    print(f"Os funcionários são pagos {bs[tipo]} na {dias[agenda.day]}")
                 print(f"Próximo dia de pagamento: {agenda.nextpayday[0]}/{agenda.nextpayday[1]}/{agenda.nextpayday[2]}")
                 x += 1
 

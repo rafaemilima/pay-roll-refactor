@@ -190,12 +190,9 @@ class Company:
     def standardPayagendas(self):
         date = time.localtime()
         month = int(time.strftime("%m", date))
-        weekly = Payagenda()
-        weekly.assumePayagenda("W", 4, None)
-        bimonthly = Payagenda()
-        bimonthly.assumePayagenda("B", 4, None)
-        monthly = Payagenda()
-        monthly.assumePayagenda("M", 100, "end")
+        weekly = AgendaW(4, None)
+        bimonthly = AgendaB(4, None)
+        monthly = AgendaM(None, "end")
         self.payagendas.append(weekly)
         self.payagendas.append(bimonthly)
         self.payagendas.append(monthly)
@@ -217,9 +214,6 @@ class Company:
                 del(i)
         return
 
-    @staticmethod
-    def addPayagenda(wday, type, period):
-        newagenda = Payagenda()
 
     def returnPayagenda(self, searched_employee):
         for payagenda in self.payagendas:
@@ -265,7 +259,7 @@ class Company:
 
                 month = today[1]
 
-                if payagenda.type == "M":
+                if payagenda.returnType() == "M":
                     month = (month + 1) % 12
                     if month == 0:
                         month += 1
@@ -273,61 +267,82 @@ class Company:
                 payagenda.getNextPayday(month, today)
 
 
-class Payagenda:
-    def __init__(self):
+class Payagenda(ABC):
+    def __init__(self, day, period):
+        d = dt.date.today()
         self.employees = []
         self.nextpayday = []
-        self.type = None
-        self.day = None
-        self.period = None
-    
-    def getNextPayday(self, month, today):
-        d = dt.date(today[2], today[1], today[0])
-        if self.type == "W":
-            if len(self.nextpayday) == 0:
-                while d.weekday() != self.day:
-                    d += dt.timedelta(1)
-            else:
-                d += dt.timedelta(7)
-
-            list = [d.day, d.month, d.year]
-            self.nextpayday = list
-
-        elif self.type == "M":
-            list = []
-            if self.period == "end":
-                h = self.getLastBusinessDay(2021, month)
-                list = [h, month, d.year]
-            elif self.period == "middle":
-                if d.day > 15:
-                    month += 1
-                list = [15, month, d.year]
-            elif self.period == "beggining":
-                if d.day > 1:
-                    month += 1
-                list = [1, month, d.year]
-
-            self.nextpayday = list
-
-        elif self.type == "B":
-            if len(self.nextpayday) == 0:
-                while d.weekday() != self.day:
-                    d += dt.timedelta(1)
-            else:
-                d += dt.timedelta(14)
-            list = [d.day, d.month, d.year]
-            self.nextpayday = list
-
-    def assumePayagenda(self, type_pa, wday, period):
-        d = dt.date.today()
-        self.type = type_pa
-        self.day = wday
+        self.day = day
         self.period = period
         self.getNextPayday(d.month, [d.day, d.month, d.year])
+
+
+    @abstractmethod
+    def getNextPayday(self, month, today):
+        pass
+
+    @abstractmethod
+    def returnType(self):
+        pass
+
+
+class AgendaM(Payagenda):
+    def getNextPayday(self, month, today):
+        d = dt.date(today[2], today[1], today[0])
+
+        list = []
+        if self.period == "end":
+            h = self.getLastBusinessDay(2021, month)
+            list = [h, month, d.year]
+        elif self.period == "middle":
+            if d.day > 15:
+                month += 1
+            list = [15, month, d.year]
+        elif self.period == "beggining":
+            if d.day > 1:
+                month += 1
+            list = [1, month, d.year]
+        self.nextpayday = list
+
+    def returnType(self):
+        return "M"
 
     @staticmethod
     def getLastBusinessDay(year: int, month: int) -> int:
         return max(calendar.monthcalendar(year, month)[-1:][0][:5])
+
+
+class AgendaW(Payagenda):
+    def getNextPayday(self, month, today):
+        d = dt.date(today[2], today[1], today[0])
+        if len(self.nextpayday) == 0:
+            while d.weekday() != self.day:
+                d += dt.timedelta(1)
+        else:
+            d += dt.timedelta(7)
+
+        list = [d.day, d.month, d.year]
+        self.nextpayday = list
+
+    def returnType(self):
+        return "W"
+
+
+class AgendaB(Payagenda):
+    def getNextPayday(self, month, today):
+        d = dt.date(today[2], today[1], today[0])
+
+        if len(self.nextpayday) == 0:
+            while d.weekday() != self.day:
+                d += dt.timedelta(1)
+        else:
+            d += dt.timedelta(14)
+        list = [d.day, d.month, d.year]
+        self.nextpayday = list
+
+    def returnType(self):
+        return "B"
+
 
 
 class Employee:
@@ -488,7 +503,6 @@ class Address:
 
     def printAddress(self):
         print(f"Endereço: {self.street} Nº {self.number}; Bairro {self.district};{self.city} - {self.state}")
-
 
 
 class Sales:
