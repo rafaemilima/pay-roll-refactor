@@ -8,9 +8,9 @@ Nesse repositório serão identificados e corrigidos alguns code smells do siste
 
 ## Code Smells Detectados
 
-|       Smell Detectado      | Fonte                                                                                                                                                                                                                                                                                                                                           | Padrões e estratégias de refatoração                                                                                                                                                                  |
+|       Code Smell Detectado      | Fonte                                                                                                                                                                                                                                                                                                                                           | Padrões e estratégias de refatoração                                                                                                                                                                  |
 |:--------------------------:|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Long Method**            | - Método **undoRedo** na classe **Actions** é bastante extenso em linhas, além de ter várias ifs e elses, bem como realizar ações que fogem do seu escopo inicial de ação e que são comuns à todas as decisões. | **Extract Method** para os passos comuns para cada decisão, seguida da aplicação do **Strategy Pattern**, transformando cada decisão em uma subclasse, aplicando conceitos de herança e polimorfismo. |
+| **Long Method**            | - Método **undoRedo** na classe **Actions** é bastante extenso em linhas, além de ter várias ifs e elses, bem como realizar ações que fogem do seu escopo inicial de ação e que são comuns à todas as decisões.<br><br> - Método **getNextPayday** na classe **Payagenda** apresenta diversas tomadas de decisão que podem ser submetidas ao strategy pattern.| **Extract Method** para os passos comuns para cada decisão, seguida da aplicação do **Strategy Pattern**, transformando cada decisão em uma subclasse, aplicando conceitos de herança e polimorfismo. |
 | **Código Duplicado**       | - Método **addEmployee** na classe **Employee** apresenta o código com notáveis similaridades com o construtor de classe.                                                                          | **Extract Method** para os passos comum aos métodos.                                                                                                                                                  |
 | **Speculative generality** | - Método **addEmployee** na classe **Employee**  não está sendo usado em nenhum local da aplicação.                                                                                                                                                                                                                                             | **Remove Method**, como o método se faz  desnecessário, o removeremos do código em detrimento do construtor.                                                                                          |
 | **Primitive obcession**    | - Atributo **address** na classe **Employee** está sendo tratado como uma string.                                                                                                                                                                                                                                                               | **Replace data value with object**, criar um objeto endereço associado à classe empregado  com todos os atributos necessários                                                                         |
@@ -25,13 +25,28 @@ Nesse repositório serão identificados e corrigidos alguns code smells do siste
 * Para solucionar os smells de Feature Envy farei uso do padrão move method.
 <br>
 
-## Code Smells solucionados
+## Code Smells Solucionados
 
-### Padrões Simples
+### Refatorados por Padrões Simples
 
-Nos padrãos simples referentes ao método undoRedo é importante mencionar que devido à extensão do método foi apresentada apenas uma pequena amostragem do método para demonstrar os padrões adotados. Caso queira conferir o método refatorado completo, avance para os padrões complexos. Ademais, o restante dos métodos à seguir demonstra os métodos refatorados por completo.
+Nos padrãos simples referentes ao método undoRedo é importante mencionar que devido à extensão do método foi apresentada apenas uma pequena amostragem para demonstrar os padrões adotados. Caso queira conferir o método refatorado completo, avance para os padrões complexos. Tirando essa exceção, o restante dos códigos à seguir demonstra os métodos completos.
 
 * **Speculative Generality e Código Duplicado na função addEmployee**: Após se certificar que o método, apesar de muito semelhante, era inferior em funcionalidades ao construtor da classe e que o mesmo não estava sendo usado em nenhuma parte do sistema, descartou-se o método mantendo apenas o construtor.
+<br>
+
+* **Primitive Obcession no atributo address da super classe Employee**: A refatoração consistiu em aplicar o padrão replace data value with object e o atributo address deixou de ser tratado como string e se tornou objeto de uma classe Address que possui atributos referentes ao conjunto de informações comunmente presentes em um endereço. 
+
+``` python
+# APÓS O REPLACE DATA VALUE WITH OBJECT
+class Address:
+    def __init__(self, street, number, district, city, state):
+        self.street = street
+        self.number = number
+        self.district = district
+        self.city = city
+        self.state = state
+```
+
 <br>
 
 * **Feature Envy no método undoRedo**: Essa função usava mais métodos e atributos da classe Action ao invés da classe em que estava, sendo assim apliquei o **Move Method** nesse método e o desloquei da classe Actions para Action. 
@@ -206,7 +221,7 @@ class Company:
 ```
 <br>
 
-### Padrões Complexos
+### Refatorados por Padrões Complexos
 * **Long Method no método undoRedo**: Apois ser deslocado para a classe Action usando o **Move Method**, para cada tomada de decisão principal desse método foi criada uma subclasse correspondente da classe Action. Cada subclasse fazia uso do método abstrato undoRedo de Action, concluindo a nossa aplicação do *Strategy Pattern*.
 
 ``` python
