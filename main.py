@@ -1,5 +1,5 @@
 from classes import Company, Employee, Hourly, Commissioned, Payagenda, Create, Remove, GeneralTaxes,\
-    AditionalTaxes, Update, UpdateType, MakeSale, ClockIn, ClockOut, PaymentToday
+    AditionalTaxes, Update, UpdateType, MakeSale, ClockIn, ClockOut, PaymentToday, Address
 import datetime as dt
 
 
@@ -45,7 +45,14 @@ def adicionar_func(empresa):
     aux1 = ["C", "S", "H"]
     aux2 = ["y", "n"]
     nome = input("Nome: ")
-    endereco = input("Endereco: ")
+    print("Endereco")
+    rua = input("Rua: ")
+    numero = input("Número: ")
+    bairro = input("Bairro: ")
+    cidade = input("Cidade: ")
+    estado = input("Estado: ")
+    endereco = Address(rua, numero, bairro, cidade, estado)
+
     tipo = input("Tipo de funcionário (C - Comissionado; S - Assalariado; H - Horista): ")
     metodopagamento = input("Método de pagamento: ")
     tipo.upper()
@@ -230,15 +237,28 @@ def funcionario(empresa):
             e = empresa.getEmployeeByID(identificador)
             copy = e
             if e:
-                aux = ["name", "salary", "syndicate", "address", "paymethod", "salary_h", "comission"]
+                aux = ["name", "salary", "issyndicate", "address", "paymethod", "salary_h", "comission"]
                 print("Digite o atributo que você deseja modificar:")
                 a = int(input("|1 - nome; 2 - salário fixo; 3 - associação sindical; 4 - endereço;\n"
                               "|5 - pay method; 6 - salário por hora; 7 - comissão\n"))
                 if e.jobtype != "H" and a == 6 or e.jobtype != "C" and a == 7:
                     print("Atributo especificado não é compatível com o tipo de funcionário")
                 else:
+                    valor = None
                     old = e.getAttribute(aux[a-1])
-                    valor = input("Digite o novo valor para o atributo especificado: ")
+
+                    if aux[a-1] == "address":
+                        print("Digite o novo valor para o atributo especificado: ")
+                        rua = input("Rua: ")
+                        numero = input("Número: ")
+                        bairro = input("Bairro: ")
+                        cidade = input("Cidade: ")
+                        estado = input("Estado: ")
+                        valor = Address(rua, numero, bairro, cidade, estado)
+                    elif a == 3:
+                        valor = not old
+                    else:
+                        valor = input("Digite o novo valor para o atributo especificado: ")
                     Update(empresa.actions, copy, value=old, attribute=aux[a-1])
                     e.update(aux[a-1], valor)
 
@@ -483,9 +503,12 @@ def main(empresa):
 
 
 c = Company()
-em1 = Hourly(c, "Rafael", "Maceió", "H", 0, "y", salary_h=10, paymethod="Depósito bancário")
-em2 = Commissioned(c, "Carlos", "Arapiraca", "C", 100, "n", 0.5, paymethod="Cheque em mãos")
-em3 = Employee(c, "João", "Recife", "S", 100, "y", 0, 0, paymethod= "Cheque no correio")
+a1 = Address("Av menino marcelo", "58", "Serraria", "Maceió", "AL")
+a2 = Address("Rua do fumo", "112", "Rave", "Arapiroca", "AL")
+a3 = Address("Avenida do Rock", "58", "Metal", "Campo-Alegre", "AL")
+em1 = Hourly(c, "Rafael", a1, "H", 0, "y", salary_h=10, paymethod="Depósito bancário")
+em2 = Commissioned(c, "Carlos", a2, "C", 100, "n", 0.5, paymethod="Cheque em mãos")
+em3 = Employee(c, "João", a3, "S", 100, "y", 0, 0, paymethod= "Cheque no correio")
 c.cleanStacks()
 
 main(c)

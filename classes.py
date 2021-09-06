@@ -354,6 +354,7 @@ class Employee:
             self.issyndicate = True
         else:
             self.issyndicate = False
+
         company.employees.append(self)
 
         if self.jobtype == "S":
@@ -374,52 +375,27 @@ class Employee:
         print("###################################")
         print(f"ID do funcionário: {self.id}")
         print(f"Nome do funcionário: {self.name}")
-        print(f"Endereço: {self.address}")
+        self.address.printAddress()
         print(f"Tipo de afiliação: {self.jobtype}")
         print(f"Salário fixo: {self.salary}")
         print(f"Salário Horário: {self.salary_h}")
         print(f"Taxa de Comissão: {self.comission}")
         print(f"Afiliação Sindical: {self.issyndicate}")
+        print(f"Método de pagamento: {self.payment.paymethod}")
         if self.card:
             print(f"ID do cartão de ponto: {self.card.cardid}")
         print("###################################")
 
     def getAttribute(self, parameter):
-        if parameter == "name":
-            return self.name
-        elif parameter == "salary":
-            return self.salary
-        elif parameter == "syndicate":
-            return self.issyndicate
-        elif parameter == "comission":
-            return self.comission
-        elif parameter == "address":
-            return self.address
-        elif parameter == "paymethod":
-            return self.payment.paymethod
-        elif parameter == "salary_h":
-            return self.salary_h
-        elif parameter == "comission":
-            return self.comission
+        if parameter == "paymethod":
+            return getattr(self.payment, parameter)
+        return getattr(self, parameter)
 
     def update(self, parameter, value):
-        if parameter == "name":
-            self.name = value
-        elif parameter == "salary":
-            self.salary = value
-        elif parameter == "syndicate":
-            self.issyndicate = value
-        elif parameter == "comission":
-            self.comission = value
-        elif parameter == "address":
-            self.address = value
-        elif parameter == "paymethod":
-            self.payment.paymethod = value
-        elif parameter == "salary_h":
-            self.salary_h = value
-        elif parameter == "comission":
-            self.comission = value
-        return
+        if parameter == "paymethod":
+            setattr(self.payment, parameter, value)
+        else:
+            setattr(self, parameter, value)
 
     @staticmethod
     def takeIDs(company):
@@ -500,6 +476,19 @@ class Commissioned(Employee):
         self.payment.value = 0
         self.comission_amount = 0
         self.aditional_taxes = 0
+
+
+class Address:
+    def __init__(self, street, number, district, city, state):
+        self.street = street
+        self.number = number
+        self.district = district
+        self.city = city
+        self.state = state
+
+    def printAddress(self):
+        print(f"Endereço: {self.street} Nº {self.number}; Bairro {self.district};{self.city} - {self.state}")
+
 
 
 class Sales:
