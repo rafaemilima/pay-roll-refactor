@@ -12,9 +12,10 @@ Nesse repositório serão identificados e corrigidos alguns code smells do siste
 |:--------------------------:|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Long Method**            | - Método **undoRedo** na classe **Actions** é bastante extenso em linhas, além de ter várias ifs e elses, bem como realizar ações que fogem do seu escopo inicial de ação e que são comuns à todas as decisões.<br><br> - Método **getNextPayday** na classe **Payagenda** apresenta diversas tomadas de decisão que podem ser submetidas ao strategy pattern.| **Extract Method** para os passos comuns para cada decisão, seguida da aplicação do **Strategy Pattern**, transformando cada decisão em uma subclasse, aplicando conceitos de herança e polimorfismo. |
 | **Código Duplicado**       | - Método **addEmployee** na classe **Employee** apresenta o código com notáveis similaridades com o construtor de classe.                                                                          | **Extract Method** para os passos comum aos métodos.                                                                                                                                                  |
-| **Speculative generality** | - Método **addEmployee** na classe **Employee**  não está sendo usado em nenhum local da aplicação.                                                                                                                                                                                                                                             | **Remove Method**, como o método se faz  desnecessário, o removeremos do código em detrimento do construtor.                                                                                          |
+| **Speculative generality** | - Método **addEmployee** na classe **Employee**  não está sendo usado em nenhum local da aplicação.<br><br> - Método **addPayagenda** na class **Company** não estava sendo usada em nenhuma parte da aplicação.                                                                                                                                                                                                                                             | **Remove Method**, como o método se faz  desnecessário, o removeremos do código em detrimento de métodos em uso.                                                                                          |
 | **Primitive obcession**    | - Atributo **address** na classe **Employee** está sendo tratado como uma string.                                                                                                                                                                                                                                                               | **Replace data value with object**, criar um objeto endereço associado à classe empregado  com todos os atributos necessários                                                                         |
 | **Feature Envy**           | - Método **remove** na classe **Employee** usa mais atributos e métodos da classe Company.<br><br> - Método **getEmployeeByID** na classe **Employee** usa mais atributos e métodos da classe Company.<br><br> - Método **undoRedo** na classe **Actions** manipula mais atributos da classe Action.                                            | **Move Method** aplicado para levar  os métodos para as classes mais apropriadas.                                                                                                                     |
+| **Middle man** | - Método **assumePayagenda** na classe **payagenda** está sendo usado como intermediário em uma ação que o próprio construtor poderia executar. | **Remover o método desnecessário** em favor do método já existente. 
 
 ## Padrões a serem aplicados
 
@@ -219,7 +220,7 @@ class Company:
             self.pushAction(action, redo)
    
 ```
-<br>
+<hr><br>
 
 ### Refatorados por Padrões Complexos
 * **Long Method no método undoRedo**: Apois ser deslocado para a classe Action usando o **Move Method**, para cada tomada de decisão principal desse método foi criada uma subclasse correspondente da classe Action. Cada subclasse fazia uso do método abstrato undoRedo de Action, concluindo a nossa aplicação do *Strategy Pattern*.
@@ -444,3 +445,146 @@ class PaymentToday(Action):
 
 
 ```
+<hr><br>
+
+* **Long Method no método getNextPayday**: Para cada tomada de decisão principal desse método foi criada uma subclasse correspondente da classe Payagenda. Cada subclasse fazia uso do método abstrato getNextPayday de Payagenda, concluindo a nossa aplicação do *Strategy Pattern*. Ademais, a variável type de payagenda tornou-se desnecessária, portanto a mesma foi removida e em seu lugar adicionou-se um método abstrato que retornaria o tipo de cada agenda de pagamento de acordo com a subclasse.
+
+```python
+# ANTES DA APLICAÇÃO DO STRATEGY PATTERN
+class Payagenda:
+    def __init__(self):
+        self.employees = []
+        self.nextpayday = []
+        self.type = None
+        self.day = None
+        self.period = None
+    
+    def getNextPayday(self, month, today):
+        d = dt.date(today[2], today[1], today[0])
+        if self.type == "W":
+            if len(self.nextpayday) == 0:
+                while d.weekday() != self.day:
+                    d += dt.timedelta(1)
+            else:
+                d += dt.timedelta(7)
+
+            list = [d.day, d.month, d.year]
+            self.nextpayday = list
+
+        elif self.type == "M":
+            list = []
+            if self.period == "end":
+                h = self.getLastBusinessDay(2021, month)
+                list = [h, month, d.year]
+            elif self.period == "middle":
+                if d.day > 15:
+                    month += 1
+                list = [15, month, d.year]
+            elif self.period == "beggining":
+                if d.day > 1:
+                    month += 1
+                list = [1, month, d.year]
+
+            self.nextpayday = list
+
+        elif self.type == "B":
+            if len(self.nextpayday) == 0:
+                while d.weekday() != self.day:
+                    d += dt.timedelta(1)
+            else:
+                d += dt.timedelta(14)
+            list = [d.day, d.month, d.year]
+            self.nextpayday = list
+
+    def assumePayagenda(self, type_pa, wday, period):
+        d = dt.date.today()
+        self.type = type_pa
+        self.day = wday
+        self.period = period
+        self.getNextPayday(d.month, [d.day, d.month, d.year])
+
+    @staticmethod
+    def getLastBusinessDay(year: int, month: int) -> int:
+        return max(calendar.monthcalendar(year, month)[-1:][0][:5])
+```
+
+```python
+# APÓS A APLICAÇÃO DO STRATEGY PATTERN
+class Payagenda(ABC):
+    def __init__(self, day, period):
+        d = dt.date.today()
+        self.employees = []
+        self.nextpayday = []
+        self.day = day
+        self.period = period
+        self.getNextPayday(d.month, [d.day, d.month, d.year])
+
+
+    @abstractmethod
+    def getNextPayday(self, month, today):
+        pass
+
+    @abstractmethod
+    def returnType(self):
+        pass
+
+
+class AgendaM(Payagenda):
+    def getNextPayday(self, month, today):
+        d = dt.date(today[2], today[1], today[0])
+
+        list = []
+        if self.period == "end":
+            h = self.getLastBusinessDay(2021, month)
+            list = [h, month, d.year]
+        elif self.period == "middle":
+            if d.day > 15:
+                month += 1
+            list = [15, month, d.year]
+        elif self.period == "beggining":
+            if d.day > 1:
+                month += 1
+            list = [1, month, d.year]
+        self.nextpayday = list
+
+    def returnType(self):
+        return "M"
+
+    @staticmethod
+    def getLastBusinessDay(year: int, month: int) -> int:
+        return max(calendar.monthcalendar(year, month)[-1:][0][:5])
+
+
+class AgendaW(Payagenda):
+    def getNextPayday(self, month, today):
+        d = dt.date(today[2], today[1], today[0])
+        if len(self.nextpayday) == 0:
+            while d.weekday() != self.day:
+                d += dt.timedelta(1)
+        else:
+            d += dt.timedelta(7)
+
+        list = [d.day, d.month, d.year]
+        self.nextpayday = list
+
+    def returnType(self):
+        return "W"
+
+
+class AgendaB(Payagenda):
+    def getNextPayday(self, month, today):
+        d = dt.date(today[2], today[1], today[0])
+
+        if len(self.nextpayday) == 0:
+            while d.weekday() != self.day:
+                d += dt.timedelta(1)
+        else:
+            d += dt.timedelta(14)
+        list = [d.day, d.month, d.year]
+        self.nextpayday = list
+
+    def returnType(self):
+        return "B"
+
+```
+<br>
