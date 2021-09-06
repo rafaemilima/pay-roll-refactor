@@ -8,27 +8,26 @@ Nesse repositório serão identificados e corrigidos alguns code smells do siste
 
 ## Code Smells Detectados
 
-|       Code Smell Detectado      | Fonte                                                                                                                                                                                                                                                                                                                                           | Padrões e estratégias de refatoração                                                                                                                                                                  |
-|:--------------------------:|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Long Method**            | - Método **undoRedo** na classe **Actions** é bastante extenso em linhas, além de ter várias ifs e elses, bem como realizar ações que fogem do seu escopo inicial de ação e que são comuns à todas as decisões.<br><br> - Método **getNextPayday** na classe **Payagenda** apresenta diversas tomadas de decisão que podem ser submetidas ao strategy pattern.| **Extract Method** para os passos comuns para cada decisão, seguida da aplicação do **Strategy Pattern**, transformando cada decisão em uma subclasse, aplicando conceitos de herança e polimorfismo. |
-| **Código Duplicado**       | - Método **addEmployee** na classe **Employee** apresenta o código com notáveis similaridades com o construtor de classe.                                                                          | **Extract Method** para os passos comum aos métodos.                                                                                                                                                  |
-| **Speculative generality** | - Método **addEmployee** na classe **Employee**  não está sendo usado em nenhum local da aplicação.<br><br> - Método **addPayagenda** na class **Company** não estava sendo usada em nenhuma parte da aplicação.                                                                                                                                                                                                                                             | **Remove Method**, como o método se faz  desnecessário, o removeremos do código em detrimento de métodos em uso.                                                                                          |
-| **Primitive obcession**    | - Atributo **address** na classe **Employee** está sendo tratado como uma string.                                                                                                                                                                                                                                                               | **Replace data value with object**, criar um objeto endereço associado à classe empregado  com todos os atributos necessários                                                                         |
-| **Feature Envy**           | - Método **remove** na classe **Employee** usa mais atributos e métodos da classe Company.<br><br> - Método **getEmployeeByID** na classe **Employee** usa mais atributos e métodos da classe Company.<br><br> - Método **undoRedo** na classe **Actions** manipula mais atributos da classe Action.                                            | **Move Method** aplicado para levar  os métodos para as classes mais apropriadas.                                                                                                                     |
-| **Middle man** | - Método **assumePayagenda** na classe **payagenda** está sendo usado como intermediário em uma ação que o próprio construtor poderia executar. | **Remover o método desnecessário** em favor do método já existente. 
+| Code Smell Detectado | Fonte | Padrões e estratégias de refatoração |
+|:-------:|----------|-------|
+| **Long Method** | - Método **undoRedo** na classe **Actions** é bastante extenso em linhas, além de ter várias ifs e elses, bem como realizar ações que fogem do seu escopo inicial de ação e que são comuns à todas as decisões.<br><br> - Método **getNextPayday** na classe **Payagenda** apresenta diversas tomadas de decisão que podem ser submetidas ao strategy pattern.| **Extract Method** para os passos comuns para cada decisão, seguida da aplicação do **Strategy Pattern**, transformando cada decisão em uma subclasse, aplicando conceitos de herança e polimorfismo. |
+| **Código Duplicado** | - Método **addEmployee** na classe **Employee** apresenta o código com notáveis similaridades com o construtor de classe. | **Extract Method** para os passos comum aos métodos. |
+| **Speculative generality** | - Método **addEmployee** na classe **Employee**  não está sendo usado em nenhum local da aplicação.<br><br> - Método **addPayagenda** na class **Company** não estava sendo usada em nenhuma parte da aplicação. | **Remove Method**, como o método se faz  desnecessário, o removeremos do código em detrimento de métodos em uso. |
+| **Primitive obcession** | - Atributo **address** na classe **Employee** está sendo tratado como uma string. | **Replace data value with object**, criar um objeto endereço associado à classe empregado  com todos os atributos necessários |
+| **Feature Envy** | - Método **remove** na classe **Employee** usa mais atributos e métodos da classe Company.<br><br> - Método **getEmployeeByID** na classe **Employee** usa mais atributos e métodos da classe Company.<br><br> - Método **undoRedo** na classe **Actions** manipula mais atributos da classe Action. | **Move Method** aplicado para levar  os métodos para as classes mais apropriadas.                                                                                                                     |
+| **Middle man** | - Método **assumePayagenda** na classe **payagenda** está sendo usado como intermediário em uma ação que o próprio construtor poderia executar. | **Extract Method** para remover o único passo pertinente desse método e após isso aplicar **Inline method** no construtor para por fim remover o método redundante.
 
 ## Padrões a serem aplicados
 
 * Na resolução da **duplicação de código**, farei uso do **extract method** juntamente com o **template method**. 
 * Para solucionar os smells **Long Method**, farei uso de padrões que combinam hierarquia e polimorfismo, com o padrão Strategy.
 * Para solucionar os smells de **primitive obcession**, usarei o padrão replace data value with object.
-* Para solucinar o smell de Speculative generality, removerei o método que não está em uso.
-* Para solucionar os smells de Feature Envy farei uso do padrão move method.
+* Para solucinar o smell de **Speculative generality**, removerei o método que não está em uso.
+* Para solucionar o smell de **Middle man** aplicarei o **extract method** seguido do **inline method**.
+* Para solucionar os smells de **Feature Envy** farei uso do padrão move method.
 <br>
 
-## Code Smells Solucionados
-
-### Refatorados por Padrões Simples
+## Code Smells Refatorados por Padrões Simples
 
 Nos padrãos simples referentes ao método undoRedo é importante mencionar que devido à extensão do método foi apresentada apenas uma pequena amostragem para demonstrar os padrões adotados. Caso queira conferir o método refatorado completo, avance para os padrões complexos. Tirando essa exceção, o restante dos códigos à seguir demonstra os métodos completos.
 
@@ -222,7 +221,7 @@ class Company:
 ```
 <hr><br>
 
-### Refatorados por Padrões Complexos
+## Code Smells Refatorados por Padrões Complexos
 * **Long Method no método undoRedo**: Apois ser deslocado para a classe Action usando o **Move Method**, para cada tomada de decisão principal desse método foi criada uma subclasse correspondente da classe Action. Cada subclasse fazia uso do método abstrato undoRedo de Action, concluindo a nossa aplicação do *Strategy Pattern*.
 
 ``` python
