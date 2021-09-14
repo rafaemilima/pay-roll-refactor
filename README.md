@@ -342,7 +342,7 @@ class Action(ABC):
         pass
 
 
-class Create(Action):
+class CreateEmployee(Action):
     def undoRedo(self, company, redo):
         if redo:
             company.employees.append(self.ogemployee)
@@ -354,7 +354,7 @@ class Create(Action):
             print("Funcionário removido do sistema!")
 
 
-class Remove(Action):
+class RemoveEmployee(Action):
     def undoRedo(self, company, redo):
         if redo:
             self.attrvalue = company.getPayagendaIndex(self.ogemployee)
@@ -367,7 +367,7 @@ class Remove(Action):
             print("Funcionário cadastrado no sistema!")
 
 
-class Update(Action):
+class UpdateEmployee(Action):
     def undoRedo(self, company, redo):
         old = self.ogemployee.getAttribute(self.attribute)
         self.ogemployee.update(self.attribute, self.attrvalue)
@@ -376,7 +376,20 @@ class Update(Action):
         # print(action.attrvalue)
 
 
-class GeneralTaxes(Action):
+class UpdateEmployeeType(Action):
+    def undoRedo(self, company, redo):
+        if redo:
+            aux = {"H": 0, "S": 2, "C": 1}
+            company.payagendas[aux[self.ogemployee.jobtype]].employees.append(self.ogemployee)
+            company.remove(self.attrvalue[0].id)
+            company.employees.append(self.ogemployee)
+        else:
+            company.remove(self.ogemployee.id)
+            company.employees.append(self.attrvalue[0])
+            company.payagendas[self.attrvalue[1]].employees.append(self.attrvalue[0])
+
+
+class ChangeGeneralTaxes(Action):
     def undoRedo(self, company, redo):
         old = company.syndicate.taxes
         company.syndicate.taxes = self.attrvalue
@@ -384,7 +397,7 @@ class GeneralTaxes(Action):
         print("Taxa geral resetada.")
 
 
-class AditionalTaxes(Action):
+class ChangeAditionalTaxes(Action):
     def undoRedo(self, company, redo):
         # print(action.ogemployee.aditional_taxes)
         new = self.attrvalue
@@ -393,7 +406,8 @@ class AditionalTaxes(Action):
         self.ogemployee.aditional_taxes -= new
         print("Taxa adicional resetada")
         # print(action.ogemployee.aditional_taxes)
-        
+
+
 class MakeSale(Action):
     def undoRedo(self, company, redo):
         if redo:
@@ -431,7 +445,7 @@ class ClockOut(Action):
         # print(employee.payment.value)
 
 
-class PaymentToday(Action):
+class MakePaymentToday(Action):
     def undoRedo(self, company, redo):
         d = dt.date.today()
         if redo:
@@ -441,6 +455,7 @@ class PaymentToday(Action):
             print("Pagamentos do dia desfeitos")
             for agenda in self.attrvalue:
                 agenda.nextpayday = [d.day, d.month, d.year]
+
 
 
 ```
