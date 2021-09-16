@@ -1,5 +1,6 @@
-from classes import Company, Employee, Hourly, Commissioned, Create, Remove, GeneralTaxes,\
-    AditionalTaxes, Update, UpdateType, MakeSale, ClockIn, ClockOut, PaymentToday, Address, AgendaW, AgendaB, AgendaM
+from classes import Company, Employee, Hourly, Commissioned, CreateEmployee, RemoveEmployee, ChangeGeneralTaxes,\
+    ChangeAditionalTaxes, UpdateEmployee, UpdateEmployeeType, MakeSale, ClockIn, ClockOut, MakePaymentToday, Address, \
+    AgendaW, AgendaB, AgendaM
 import datetime as dt
 
 
@@ -19,7 +20,7 @@ def sindicato_func(empresa):
         elif n == "1":
             print(f"Taxa atual: {empresa.syndicate.taxes}")
             taxa_geral = float(input("Informe o valor que deseja adicionar para a taxa geral: "))
-            GeneralTaxes(empresa.actions, None, empresa.syndicate.taxes)
+            ChangeGeneralTaxes(empresa.actions, None, empresa.syndicate.taxes)
             empresa.syndicate.changeGeneralTaxes(taxa_geral)
             print(empresa.syndicate.taxes)
 
@@ -28,7 +29,7 @@ def sindicato_func(empresa):
             taxa_ad = float(input("Informe a taxa adicional de serviço: "))
             e = empresa.getEmployeeByID(identificador)
             if e:
-                AditionalTaxes(empresa.actions, e, taxa_ad)
+                ChangeAditionalTaxes(empresa.actions, e, taxa_ad)
                 empresa.syndicate.plusAditionalTaxes(empresa, identificador, taxa_ad)
 
         elif n == "3":
@@ -159,7 +160,7 @@ def cartao(empresa):
                         new = Hourly(empresa, e.name, e.address, "H", 0, e.issyndicate, salary_h,
                                      paymethod=e.payment.paymethod, id=e.id)
                         print("Novo cartão de ponto criado!")
-                        UpdateType(empresa.actions, new, [e, aindex])
+                        UpdateEmployeeType(empresa.actions, new, [e, aindex])
 
         elif n == "2":
             identificador = str(input("ID do funcionário: "))
@@ -207,7 +208,7 @@ def funcionario(empresa):
         elif n == "1":
             new = adicionar_func(empresa)
             aindex = empresa.getPayagendaIndex(new)
-            Create(empresa.actions, new, aindex)
+            CreateEmployee(empresa.actions, new, aindex)
             print("Novo funcionario criado!")
             print(f"ID: {new.id}")
 
@@ -219,7 +220,7 @@ def funcionario(empresa):
             if confirme == "y" and e:
                 empresa.remove(identificador)
                 aindex = empresa.getPayagendaIndex(e)
-                Remove(empresa.actions, e, aindex)
+                RemoveEmployee(empresa.actions, e, aindex)
                 print("Funcionario removido do sistema")
             else:
                 print("ID inválido. Cerfique-se que o funcionário está no sistema.")
@@ -259,7 +260,7 @@ def funcionario(empresa):
                         valor = not old
                     else:
                         valor = input("Digite o novo valor para o atributo especificado: ")
-                    Update(empresa.actions, copy, value=old, attribute=aux[a-1])
+                    UpdateEmployee(empresa.actions, copy, value=old, attribute=aux[a - 1])
                     e.update(aux[a-1], valor)
 
             else:
@@ -311,7 +312,7 @@ def funcionario(empresa):
                         e.remove(empresa, e.id)
                         new = Employee(empresa, e.name, e.address, x, salary, e.issyndicate, 0, 0,
                                       paymethod=e.payment.paymethod, id=e.id)
-                    UpdateType(empresa.actions, new, [e, aindex])
+                    UpdateEmployeeType(empresa.actions, new, [e, aindex])
                     print("Afiliação do funcionário atualizada!")
 
         elif n == "6":
@@ -321,7 +322,7 @@ def funcionario(empresa):
             set = False
             if e:
                 agenda = empresa.returnPayagenda(e)
-                if agenda.type == "M":
+                if agenda.returnType == "M":
                     aux = {"beggining": "dia 1", "middle": "dia 15", "end": "último dia útil"}
                     aux2 = ["beggining", "middle", "end"]
                     print("------Agenda atual------")
@@ -363,13 +364,13 @@ def funcionario(empresa):
                             print("Você já está sendo pago nesse dia!")
                         else:
                             for a in empresa.payagendas:
-                                if a.type == agenda.type and a.day == day-1:
+                                if a.returnType == agenda.returnType and a.day == day-1:
                                     agenda.employees.remove(e)
                                     a.employees.append(e)
                                     set = True
                             if not set:
                                 new = AgendaW(day - 1, None)
-                                if agenda.type == "B":
+                                if agenda.returnType == "B":
                                     tipo = "bissemanal"
                                     new = AgendaB(day - 1, None)
                                 agenda.employees.remove(e)
@@ -412,7 +413,7 @@ def pagamentos(empresa):
                     list.append(agenda)
 
             empresa.makePayments([d.day, d.month, d.year], empresa.syndicate.taxes)
-            PaymentToday(empresa.actions, None, list)
+            MakePaymentToday(empresa.actions, None, list)
         elif n == "2":
             m = int(input(f"Defina a quantidade de dias a partir de hoje {d.day}/{d.month}/{d.year} "
                           f"ao qual deseja efetuar o pagamento: "))
@@ -505,11 +506,11 @@ def main(empresa):
 
 c = Company()
 a1 = Address("Av menino marcelo", "58", "Serraria", "Maceió", "AL")
-a2 = Address("Rua do fumo", "112", "Rave", "Arapiroca", "AL")
+a2 = Address("Rua do fumo", "112", "Rave", "Arapiraca", "AL")
 a3 = Address("Avenida do Rock", "58", "Metal", "Campo-Alegre", "AL")
 em1 = Hourly(c, "Rafael", a1, "H", 0, "y", salary_h=10, paymethod="Depósito bancário")
-em2 = Commissioned(c, "Carlos", a2, "C", 100, "n", 0.5, paymethod="Cheque em mãos")
-em3 = Employee(c, "João", a3, "S", 100, "y", 0, 0, paymethod= "Cheque no correio")
+em2 = Commissioned(c, "Paulo", a2, "C", 100, "n", 0.5, paymethod="Cheque em mãos")
+em3 = Employee(c, "José", a3, "S", 100, "y", 0, 0, paymethod= "Cheque no correio")
 c.cleanStacks()
 
 main(c)
