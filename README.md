@@ -19,12 +19,12 @@ Nesse repositório serão identificados e corrigidos alguns code smells do siste
 
 ## Padrões a serem aplicados
 
-* Na resolução da **duplicação de código**, farei uso do **extract method** juntamente com o **template method**. 
-* Para solucionar os smells **Long Method**, farei uso de padrões que combinam hierarquia e polimorfismo, com o padrão Strategy.
-* Para solucionar os smells de **primitive obcession**, usarei o padrão replace data value with object.
+* Na resolução da **duplicação de código**, farei uso do **extract method**.
+* Para solucionar os smells **Long Method**, farei uso de padrões que combinam hierarquia e polimorfismo, como o padrão **Strategy**.
+* Para solucionar os smells de **primitive obcession**, usarei o padrão **replace data value with object**.
 * Para solucinar o smell de **Speculative generality**, removerei o método que não está em uso.
 * Para solucionar o smell de **Middle man** aplicarei o **extract method** seguido do **inline method**.
-* Para solucionar os smells de **Feature Envy** farei uso do padrão move method.
+* Para solucionar os smells de **Feature Envy** farei uso do padrão **move method**.
 <br>
 
 ## Code Smells Refatorados por Padrões Simples
@@ -32,9 +32,12 @@ Nesse repositório serão identificados e corrigidos alguns code smells do siste
 Nos padrãos simples referentes ao método undoRedo é importante mencionar que devido à extensão do método foi apresentada apenas uma pequena amostragem para demonstrar os padrões adotados. Caso queira conferir o método refatorado completo, avance para os padrões complexos. Tirando essa exceção, o restante dos códigos à seguir demonstra os métodos completos.
 
 * **Speculative Generality e Código Duplicado na função addEmployee**: Após se certificar que o método, apesar de muito semelhante, era inferior em funcionalidades ao construtor da classe e que o mesmo não estava sendo usado em nenhuma parte do sistema, descartou-se o método mantendo apenas o construtor.
-<br>
+<br> [Fonte do Code Smells](https://github.com/rafaemilima/folha-de-pagamento/blob/db1b1cf20929b9fdecbd47bc9bff24fe8f0ca04b/classes.py#L299-L322) <br>
+Não há link de refatoração, pois como falado acima bastou que se removesse o método. <br>
 
-* **Primitive Obcession no atributo address da super classe Employee**: A refatoração consistiu em aplicar o padrão replace data value with object e o atributo address deixou de ser tratado como string e se tornou objeto de uma classe Address que possui atributos referentes ao conjunto de informações comunmente presentes em um endereço. 
+* **Primitive Obcession no atributo address da super classe Employee**: A refatoração consistiu em aplicar o padrão replace data value with object e o atributo address deixou de ser tratado como string e se tornou objeto de uma classe Address que possui atributos referentes ao conjunto de informações comumente presentes em um endereço. <br>
+[Fonte do Code Smells](https://github.com/rafaemilima/folha-de-pagamento/blob/db1b1cf20929b9fdecbd47bc9bff24fe8f0ca04b/main.py#L47)<br>
+[Refarorado](https://github.com/rafaemilima/pay-roll-refactor/blob/77bb706d48bc3e74478c4072218aba340dcdf057/classes.py#L496-L505)
 
 ``` python
 # APÓS O REPLACE DATA VALUE WITH OBJECT
@@ -49,7 +52,9 @@ class Address:
 
 <br>
 
-* **Feature Envy no método undoRedo**: Essa função usava mais métodos e atributos da classe Action ao invés da classe em que estava, sendo assim apliquei o **Move Method** nesse método e o desloquei da classe Actions para Action. 
+* **Feature Envy no método undoRedo**: Essa função usava mais métodos e atributos da classe Action ao invés da classe em que estava, sendo assim apliquei o **Move Method** nesse método e o desloquei da classe Actions para Action. <br>
+[Fonte do Code Smells](https://github.com/rafaemilima/folha-de-pagamento/blob/db1b1cf20929b9fdecbd47bc9bff24fe8f0ca04b/classes.py#L12-L104) <br>
+[Refarorado](https://github.com/rafaemilima/pay-roll-refactor/blob/77bb706d48bc3e74478c4072218aba340dcdf057/classes.py#L35-L46)
 
 ``` python
 # ANTES DO MOVE METHOD
@@ -112,7 +117,9 @@ class Action:
 
 <br>
 
-* **Feature Envy no metodo remove**: A função remove da classe Employee, apresenta uma predominância de métodos e atributos da classe Company. Sendo assim, apliquei o **Move Method** e desloquei esse método para a classe mais adequada, nesse caso a classe Company.
+* **Feature Envy no metodo remove**: A função remove da classe Employee, apresenta uma predominância de métodos e atributos da classe Company. Sendo assim, apliquei o **Move Method** e desloquei esse método para a classe mais adequada, nesse caso a classe Company.<br>
+[Fonte do Code Smells](https://github.com/rafaemilima/folha-de-pagamento/blob/db1b1cf20929b9fdecbd47bc9bff24fe8f0ca04b/classes.py#L384-L395)<br>
+[Refarorado](https://github.com/rafaemilima/pay-roll-refactor/blob/77bb706d48bc3e74478c4072218aba340dcdf057/classes.py#L206-L215)
 
 ``` python
 # ANTES DO MOVE METHOD
@@ -149,7 +156,10 @@ class Company:
 ```
 <br>
 
-* **Feature Envy no método getEmployeeByID**: A função anteriormente na classe Employee, apresenta uma predominância de métodos e atributos da classe Company. Sendo assim, apliquei o **Move Method** e desloquei esse método para a classe Company.
+* **Feature Envy no método getEmployeeByID**: A função anteriormente na classe Employee, apresenta uma predominância de métodos e atributos da classe Company. Sendo assim, apliquei o **Move Method** e desloquei esse método para a classe Company. <br>
+[Fonte do Code Smells](https://github.com/rafaemilima/folha-de-pagamento/blob/db1b1cf20929b9fdecbd47bc9bff24fe8f0ca04b/classes.py#L377-L382)<br>
+[Refarorado](https://github.com/rafaemilima/pay-roll-refactor/blob/77bb706d48bc3e74478c4072218aba340dcdf057/classes.py#L200-L204)
+
 
 ``` python
 # ANTES DO MOVE METHOD
@@ -175,7 +185,9 @@ class Company:
 ```
 <br>
 
-* **Long Method no método undoRedoControl**: Após o move method, esse método de controle que continuou na classe Actions, permaneceu com ações fora do escopo da sua proposta de funcionalidade, sendo assim performou-se o **Extract Method** e criou-se duas funções auxiliares para realizar essas funções, deixando o código mais limpo e auto explicativo.
+* **Long Method no método undoRedoControl**: Após o move method, esse método de controle que continuou na classe Actions, permaneceu com ações fora do escopo da sua proposta de funcionalidade, sendo assim performou-se o **Extract Method** e criou-se duas funções auxiliares para realizar essas funções, deixando o código mais limpo e auto explicativo. <br>
+[Refatorado](https://github.com/rafaemilima/pay-roll-refactor/blob/77bb706d48bc3e74478c4072218aba340dcdf057/classes.py#L13-L32)<br>
+Como esse smell surgiu durante o processo de refatoração, não tenho um link fonte para ele, contudo abaixo está o seu recorte:
 
 ```python
 # ANTES DO EXTRACT METHOD
@@ -222,7 +234,9 @@ class Company:
 <hr><br>
 
 ## Code Smells Refatorados por Padrões Complexos
-* **Long Method no método undoRedo**: Apois ser deslocado para a classe Action usando o **Move Method**, para cada tomada de decisão principal desse método foi criada uma subclasse correspondente da classe Action. Cada subclasse fazia uso do método abstrato undoRedo de Action, concluindo a nossa aplicação do *Strategy Pattern*.
+* **Long Method no método undoRedo**: Apois ser deslocado para a classe Action usando o **Move Method**, para cada tomada de decisão principal desse método foi criada uma subclasse correspondente da classe Action. Cada subclasse fazia uso do método abstrato undoRedo de Action, concluindo a nossa aplicação do *Strategy Pattern*. <br>
+[Fonte do Code Smells](https://github.com/rafaemilima/folha-de-pagamento/blob/db1b1cf20929b9fdecbd47bc9bff24fe8f0ca04b/classes.py#L12-L104) <br>
+[Refatorado]()
 
 ``` python
 # ANTES DA APLICAÇÃO DO STRATEGY PATTERN
@@ -461,7 +475,8 @@ class MakePaymentToday(Action):
 ```
 <hr><br>
 
-* **Long Method no método getNextPayday**: Para cada tomada de decisão principal desse método foi criada uma subclasse correspondente da classe Payagenda. Cada subclasse fazia uso do método abstrato getNextPayday de Payagenda, concluindo a nossa aplicação do *Strategy Pattern*. Ademais, a variável type de payagenda tornou-se desnecessária, portanto a mesma foi removida e em seu lugar adicionou-se um método abstrato que retornaria o tipo de cada agenda de pagamento de acordo com a subclasse.
+* **Long Method no método getNextPayday**: Para cada tomada de decisão principal desse método foi criada uma subclasse correspondente da classe Payagenda. Cada subclasse fazia uso do método abstrato getNextPayday de Payagenda, concluindo a nossa aplicação do *Strategy Pattern*. Ademais, a variável type de payagenda tornou-se desnecessária, portanto a mesma foi removida e em seu lugar adicionou-se um método abstrato que retornaria o tipo de cada agenda de pagamento de acordo com a subclasse. <br>
+[Fonte do Code Smells](https://github.com/rafaemilima/folha-de-pagamento/blob/db1b1cf20929b9fdecbd47bc9bff24fe8f0ca04b/classes.py#L220-L256) <br>
 
 ```python
 # ANTES DA APLICAÇÃO DO STRATEGY PATTERN
